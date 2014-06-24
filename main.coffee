@@ -19,6 +19,9 @@ list of exterior points [point,point,point ... point]
 
 ###
 
+# TODO prevent overlaying same point
+# TODO repeat failed "grow" commands
+# TODO: maybe shortcut two points from exterior
 
 
 # returns true if the line between the first two points intersects the
@@ -83,7 +86,6 @@ class NormalDistribution
     @variance = ((len1-@mean)**2 + (len2-@mean)**2 + (len3-@mean)**2) / 9
     @stdev = Math.sqrt(@variance)
 
-
   sample: () ->
     # Math.random has mean 0.5 and variance 1/12.
     x = (Math.random() - 0.5)*2*Math.sqrt(3)
@@ -135,7 +137,7 @@ class Graph
 
 
 # initial triangle:
-graph = new Graph([110,110],[150,110],[130,190])
+graph = new Graph([110,110],[180,110],[130,190])
 
 dist = new NormalDistribution(edgelen(graph.edges[0]),
                               edgelen(graph.edges[1]),
@@ -175,9 +177,21 @@ grow = () ->
     [n1, n2] = nps
 
     safeToAdd = (testpoint) ->
-      # return false if isNaN(testpoint[0]) or isNaN(testpoint[1]) #NaN checks
+      # check new point doesn't form 4-sided shape
+      adjp1 = graph.edges.filter(([u,v]) -> u is p1 or v is p1).map(([u,v]) -> if u is p1 then v else u)
+      adjp2 = graph.edges.filter(([u,v]) -> u is p2 or v is p2).map(([u,v]) -> if u is p2 then v else u)
+
+      for c in adjp1 when (c in adjp2)
+        leftmost = Math.min p1[0],p2[0],c[0]
+        rightmost = Math.max p1[0],p2[0],c[0]
+        lower = Math.min p1[1],p2[1],c[1]
+        upper = Math.max p1[1],p2[1],c[1]
+        # if testpoint in triangle p1,p2,c return false
+        if leftmost<=testpoint[0]<=rightmost and lower<=testpoint[1]<=upper
+          return false
+
+      # check both new edges don't overlap with anything
       for [a,b] in graph.edges
-        # check both new edges don't overlap with anything
         if intersects(a,b,testpoint,p1) then return false
         if intersects(a,b,testpoint,p2) then return false
       return true
@@ -189,4 +203,5 @@ grow = () ->
       graph.extend(p1,p2,n1)
       drawgraph()
   else
-    console.log 'impossible'
+    console.log 'failed'
+    # grow()

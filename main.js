@@ -129,7 +129,7 @@ Graph = (function() {
 
 })();
 
-graph = new Graph([110, 110], [150, 110], [130, 190]);
+graph = new Graph([110, 110], [180, 110], [130, 190]);
 
 dist = new NormalDistribution(edgelen(graph.edges[0]), edgelen(graph.edges[1]), edgelen(graph.edges[2]));
 
@@ -171,10 +171,49 @@ grow = function() {
   if (nps.length > 0) {
     n1 = nps[0], n2 = nps[1];
     safeToAdd = function(testpoint) {
-      var a, b, _i, _len, _ref, _ref1;
-      _ref = graph.edges;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        _ref1 = _ref[_i], a = _ref1[0], b = _ref1[1];
+      var a, adjp1, adjp2, b, c, leftmost, lower, rightmost, upper, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3;
+      adjp1 = graph.edges.filter(function(_arg) {
+        var u, v;
+        u = _arg[0], v = _arg[1];
+        return u === p1 || v === p1;
+      }).map(function(_arg) {
+        var u, v;
+        u = _arg[0], v = _arg[1];
+        if (u === p1) {
+          return v;
+        } else {
+          return u;
+        }
+      });
+      adjp2 = graph.edges.filter(function(_arg) {
+        var u, v;
+        u = _arg[0], v = _arg[1];
+        return u === p2 || v === p2;
+      }).map(function(_arg) {
+        var u, v;
+        u = _arg[0], v = _arg[1];
+        if (u === p2) {
+          return v;
+        } else {
+          return u;
+        }
+      });
+      for (_i = 0, _len = adjp1.length; _i < _len; _i++) {
+        c = adjp1[_i];
+        if (!((__indexOf.call(adjp2, c) >= 0))) {
+          continue;
+        }
+        leftmost = Math.min(p1[0], p2[0], c[0]);
+        rightmost = Math.max(p1[0], p2[0], c[0]);
+        lower = Math.min(p1[1], p2[1], c[1]);
+        upper = Math.max(p1[1], p2[1], c[1]);
+        if ((leftmost <= (_ref = testpoint[0]) && _ref <= rightmost) && (lower <= (_ref1 = testpoint[1]) && _ref1 <= upper)) {
+          return false;
+        }
+      }
+      _ref2 = graph.edges;
+      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+        _ref3 = _ref2[_j], a = _ref3[0], b = _ref3[1];
         if (intersects(a, b, testpoint, p1)) {
           return false;
         }
@@ -192,6 +231,6 @@ grow = function() {
       return drawgraph();
     }
   } else {
-    return console.log('impossible');
+    return console.log('failed');
   }
 };
