@@ -5,7 +5,7 @@
 3. Choose two length by sampling from distribution
 4. From exterior points of graph: Randomly choose a pair of adjacent points.
 5. Compute extra point
-6. Add new point to data structure
+6. Add new point to data structure (Don't add if edges cross existing ones!)
 
 Repeat
 
@@ -20,14 +20,36 @@ list of exterior points [point,point,point ... point]
 ###
 
 
-# finds new points p3 such that p3 is len1 from p1 and len2 from p2
+# finds new points such that p3 is len1 from p1 and len2 from p2
 # returns two possibilities
-trilaterate = (p1,p2,len1,len2) ->
+newpoints = (p1,p2,l1,l2) ->
+  [r,s] = p1
+  [p,q] = p2
+
+  # perform translation to move p1 to origin.
+  w = p-r
+  z = q-s
+
+  w2z2 = w**2 + z**2
+  lambda = w2z2 + l1**2 - l2**2
+  # find xs
+  discx = w**2*lambda**2 - 4*w2z2*(0.5*lambda**2 - z**2*l1**2)
+  x1 = (w*lambda + Math.sqrt(discx)) / (2*w2z2) #quadratic formula
+  x2 = (w*lambda - Math.sqrt(discx)) / (2*w2z2)
+
+  # find ys
+  discy = z**2*lambda*2 - 4*w2z2*(0.5*lambda**2 - w**2*l1**2)
+
+  y1 = (z*lambda + Math.sqrt(discy)) / (2*w2z2) #quadratic formula
+  y1 = (z*lambda - Math.sqrt(discy)) / (2*w2z2)
+
+  return [[x1,y1], [x2,y2]]
+
 
 
 
 class NormalDistribution
-  # mean     : 
+  # mean     :
   # variance :
   # stdev    :
 
