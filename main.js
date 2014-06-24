@@ -19,86 +19,99 @@ set of points :: (x,y) coordinates
 set of edges [point,point]
 list of exterior points [point,point,point ... point]
  */
+var Graph, NormalDistribution, newpoints,
+  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-(function() {
-  var Graph, NormalDistribution, newpoints,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+window.onload = function() {
+  var edge, graph, p1, p2, p3, paper, x1, x2, y1, y2, _i, _len, _ref, _ref1, _ref2, _results;
+  p1 = [10, 10];
+  p2 = [50, 10];
+  p3 = [30, 90];
+  graph = new Graph(p1, p2, p3);
+  paper = new Raphael(document.getElementsByTagName('div')[0], 600, 200);
+  _ref = graph.getEdges();
+  _results = [];
+  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+    edge = _ref[_i];
+    (_ref1 = edge[0], x1 = _ref1[0], y1 = _ref1[1]), (_ref2 = edge[1], x2 = _ref2[0], y2 = _ref2[1]);
+    _results.push(paper.path("M " + x1 + " " + y1 + " l " + (x2 - x1) + " " + (y2 - y1)));
+  }
+  return _results;
+};
 
-  newpoints = function(p1, p2, l1, l2) {
-    var discx, discy, lambda, p, q, r, s, w, w2z2, x1, x2, y1, z;
-    r = p1[0], s = p1[1];
-    p = p2[0], q = p2[1];
-    w = p - r;
-    z = q - s;
-    w2z2 = Math.pow(w, 2) + Math.pow(z, 2);
-    lambda = w2z2 + Math.pow(l1, 2) - Math.pow(l2, 2);
-    discx = Math.pow(w, 2) * Math.pow(lambda, 2) - 4 * w2z2 * (0.5 * Math.pow(lambda, 2) - Math.pow(z, 2) * Math.pow(l1, 2));
-    x1 = (w * lambda + Math.sqrt(discx)) / (2 * w2z2);
-    x2 = (w * lambda - Math.sqrt(discx)) / (2 * w2z2);
-    discy = Math.pow(z, 2) * lambda * 2 - 4 * w2z2 * (0.5 * Math.pow(lambda, 2) - Math.pow(w, 2) * Math.pow(l1, 2));
-    y1 = (z * lambda + Math.sqrt(discy)) / (2 * w2z2);
-    y1 = (z * lambda - Math.sqrt(discy)) / (2 * w2z2);
-    return [[x1 + r, y1 + s], [x2 + r, y2 + s]];
+newpoints = function(p1, p2, l1, l2) {
+  var discx, discy, lambda, p, q, r, s, w, w2z2, x1, x2, y1, z;
+  r = p1[0], s = p1[1];
+  p = p2[0], q = p2[1];
+  w = p - r;
+  z = q - s;
+  w2z2 = Math.pow(w, 2) + Math.pow(z, 2);
+  lambda = w2z2 + Math.pow(l1, 2) - Math.pow(l2, 2);
+  discx = Math.pow(w, 2) * Math.pow(lambda, 2) - 4 * w2z2 * (0.5 * Math.pow(lambda, 2) - Math.pow(z, 2) * Math.pow(l1, 2));
+  x1 = (w * lambda + Math.sqrt(discx)) / (2 * w2z2);
+  x2 = (w * lambda - Math.sqrt(discx)) / (2 * w2z2);
+  discy = Math.pow(z, 2) * lambda * 2 - 4 * w2z2 * (0.5 * Math.pow(lambda, 2) - Math.pow(w, 2) * Math.pow(l1, 2));
+  y1 = (z * lambda + Math.sqrt(discy)) / (2 * w2z2);
+  y1 = (z * lambda - Math.sqrt(discy)) / (2 * w2z2);
+  return [[x1 + r, y1 + s], [x2 + r, y2 + s]];
+};
+
+NormalDistribution = (function() {
+  function NormalDistribution(len1, len2, len3) {
+    this.mean = (len1 + len2 + len3) / 3;
+    this.variance = (Math.pow(len1 - mean, 2) + Math.pow(len2 - mean, 2) + Math.pow(len3 - mean, 2)) / 9;
+    this.stdev = Math.sqrt(this.variance);
+  }
+
+  NormalDistribution.prototype.sample = function() {
+    var x;
+    x = (Math.random() - 0.5) * 2 * Math.sqrt(3);
+    return this.stdev * x + this.mean;
   };
 
-  NormalDistribution = (function() {
-    function NormalDistribution(len1, len2, len3) {
-      this.mean = (len1 + len2 + len3) / 3;
-      this.variance = (Math.pow(len1 - mean, 2) + Math.pow(len2 - mean, 2) + Math.pow(len3 - mean, 2)) / 9;
-      this.stdev = Math.sqrt(this.variance);
+  return NormalDistribution;
+
+})();
+
+Graph = (function() {
+  Graph.prototype.points = [];
+
+  Graph.prototype.exteriors = [];
+
+  Graph.prototype.edges = [];
+
+  function Graph(p1, p2, p3) {
+    this.points = [p1, p2, p3];
+    this.exteriors = [p1, p2, p3];
+    this.edges = [[p1, p2], [p2, p3], [p3, p1]];
+  }
+
+  Graph.prototype.extendGraph = function(origp1, origp2, newpoint) {
+    var a, b, i, j;
+    if (!(__indexOf.call(this.points, origp1) >= 0 && __indexOf.call(this.points, origp2) >= 0)) {
+      console.error("extendGraph must extend an existing point");
     }
-
-    NormalDistribution.prototype.sample = function() {
-      var x;
-      x = (Math.random() - 0.5) * 2 * Math.sqrt(3);
-      return this.stdev * x + this.mean;
-    };
-
-    return NormalDistribution;
-
-  })();
-
-  Graph = (function() {
-    Graph.prototype.points = [];
-
-    Graph.prototype.exteriors = [];
-
-    Graph.prototype.edges = [];
-
-    function Graph(p1, p2, p3) {
-      this.points = [p1, p2, p3];
-      this.exteriors = [p1, p2, p3];
-      this.edges = [[p1, p2], [p2, p3], [p3, p1]];
+    this.points.push(newpoint);
+    this.edges.push([origp1, newpoint]);
+    this.edges.push([newpoint, origp2]);
+    i = this.exteriors.indexOf(origp1);
+    j = this.exteriors.indexOf(origp2);
+    if (!(i - j === 1 || j - i === 1)) {
+      console.error("exterior invariant broken");
     }
+    a = Math.min(i, j);
+    b = Math.max(i, j);
+    this.exteriors = this.exteriors.slice(0, +a + 1 || 9e9).concat([newpoint], this.exteriors.slice(b));
+  };
 
-    Graph.prototype.extendGraph = function(origp1, origp2, newpoint) {
-      var a, b, i, j;
-      if (!(__indexOf.call(this.points, origp1) >= 0 && __indexOf.call(this.points, origp2) >= 0)) {
-        console.error("extendGraph must extend an existing point");
-      }
-      this.points.push(newpoint);
-      this.edges.push([origp1, newpoint]);
-      this.edges.push([newpoint, origp2]);
-      i = this.exteriors.indexOf(origp1);
-      j = this.exteriors.indexOf(origp2);
-      if (!(i - j === 1 || j - i === 1)) {
-        console.error("exterior invariant broken");
-      }
-      a = Math.min(i, j);
-      b = Math.max(i, j);
-      this.exteriors = this.exteriors.slice(0, +a + 1 || 9e9).concat([newpoint], this.exteriors.slice(b));
-    };
+  Graph.prototype.getPoints = function() {
+    return this.points;
+  };
 
-    Graph.prototype.getPoints = function() {
-      return this.points;
-    };
+  Graph.prototype.getEdges = function() {
+    return this.edges;
+  };
 
-    Graph.prototype.getEdges = function() {
-      return this.edges;
-    };
+  return Graph;
 
-    return Graph;
-
-  })();
-
-}).call(this);
+})();

@@ -19,6 +19,28 @@ list of exterior points [point,point,point ... point]
 
 ###
 
+window.onload = () ->
+
+  # initial triangle:
+  p1 = [10,10]
+  p2 = [50,10]
+  p3 = [30,90]
+  graph = new Graph(p1,p2,p3)
+
+
+  # rendering
+  paper = new Raphael(document.getElementsByTagName('div')[0], 600, 200);
+
+  for edge in graph.getEdges()
+    [[x1,y1],[x2,y2]] = edge
+    paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}")
+
+
+  # line1 = paper.path("M 20 10 l 100 200")
+  # line1.attr({stroke: '#ddd', 'stroke-width': 5});
+
+
+
 
 # finds new points such that p3 is len1 from p1 and len2 from p2
 # returns two possibilities
