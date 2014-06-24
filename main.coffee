@@ -33,12 +33,15 @@ intersects = ([a,b],[c,d],[p,q],[r,s]) ->
     gamma = ((b-d)*(r-a) + (c-a)*(s-b)) / det
     return 0<lambda<1 and 0<gamma<1
 
+# length of an edge
+edgelen = ([[x1,y1],[x2,y2]]) -> Math.sqrt((x2-x1)**2 + (y2-y1)**2)
 
 # finds new points such that p3 is len1 from p1 and len2 from p2
 # returns two possibilities
-newpoints = (p1,p2,l1,l2) ->
+newpoints = (p1,p2,l1,l2) -> # TODO: two errors. discx=0 sometimes. not always returning isosceles!!
   [r,s] = p1
   [p,q] = p2
+
 
   # perform translation to move p1 to origin, simplifies calcs
   w = p-r
@@ -48,7 +51,14 @@ newpoints = (p1,p2,l1,l2) ->
 
   discx = w**2*lambda**2 - 4*w2z2*(0.25*lambda**2 - z**2*l1**2)
   discy = z**2*lambda**2 - 4*w2z2*(0.25*lambda**2 - w**2*l1**2)
+
+
   if discx < 0 or discy < 0
+    return []
+  if discx is 0 or discy is 0
+    paper.circle(r, s, l1).attr({fill: "none", 'stroke-width':1, 'stroke':'rgba(0,0,255,0.3)'});
+    paper.circle(p, q, l2).attr({fill: "none", 'stroke-width':1, 'stroke':'rgba(0,0,255,0.3)'});
+    console.warn "discx", discx, "discy", discy
     return []
   else
     x1 = (w*lambda + Math.sqrt(discx)) / (2*w2z2) #quadratic formula
@@ -56,6 +66,24 @@ newpoints = (p1,p2,l1,l2) ->
 
     y1 = (z*lambda + Math.sqrt(discy)) / (2*w2z2)
     y2 = (z*lambda - Math.sqrt(discy)) / (2*w2z2)
+
+    realL1 = edgelen([p1,[x1+r,y1+s]])
+    if Math.round(l1) isnt Math.round(realL1)
+      console.error "l1 doesn't match realL1:", realL1
+      paper.circle(r, s, l1).attr({fill: "none", 'stroke-width':1, 'stroke':'red'});
+      paper.circle(p, q, l2).attr({fill: "none", 'stroke-width':1, 'stroke':'red'});
+      paper.circle(x1+r, y1+r, 4).attr({fill: "none", 'stroke-width':1, 'stroke':'green'});
+      paper.circle(x2+r, y2+r, 4).attr({fill: "none", 'stroke-width':1, 'stroke':'green'});
+      return []
+
+    realL2 = edgelen([p2,[x2+r,y2+s]])
+    if Math.round(l2) isnt Math.round(realL2)
+      console.error "l2 doesn't match realL2:", realL2
+      paper.circle(r, s, l1).attr({fill: "none", 'stroke-width':1, 'stroke':'red'});
+      paper.circle(p, q, l2).attr({fill: "none", 'stroke-width':1, 'stroke':'red'});
+      paper.circle(x1+r, y1+r, 4).attr({fill: "none", 'stroke-width':1, 'stroke':'green'});
+      paper.circle(x2+r, y2+r, 4).attr({fill: "none", 'stroke-width':1, 'stroke':'green'});
+      return []
 
     return [[x1+r,y1+s], [x2+r,y2+s]]  # translate away from origin
 
@@ -131,11 +159,10 @@ class Graph
 
 # initial triangle:
 graph = new Graph([110,110],[150,110],[130,190])
-len = ([[x1,y1],[x2,y2]]) -> Math.sqrt((x2-x1)**2 + (y2-y1)**2)
 
-dist = new NormalDistribution(len(graph.edges[0]),
-                              len(graph.edges[1]),
-                              len(graph.edges[2]))
+dist = new NormalDistribution(edgelen(graph.edges[0]),
+                              edgelen(graph.edges[1]),
+                              edgelen(graph.edges[2]))
 
 
 paper = new Raphael(document.getElementsByTagName('div')[0], 600, 400);
@@ -146,6 +173,7 @@ drawgraph = () ->
   paper.clear()
 
   for [[x1,y1],[x2,y2]] in graph.getEdges()
+    # console.log "M #{x1} #{y1} l #{x2-x1} #{y2-y1}"
     paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}")
 
   for [x,y] in graph.exteriors

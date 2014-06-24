@@ -19,7 +19,7 @@ set of points :: (x,y) coordinates
 set of edges [point,point]
 list of exterior points [point,point,point ... point]
  */
-var Graph, NormalDistribution, dist, drawgraph, graph, grow, intersects, len, newpoints, paper,
+var Graph, NormalDistribution, dist, drawgraph, edgelen, graph, grow, intersects, newpoints, paper,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 intersects = function(_arg, _arg1, _arg2, _arg3) {
@@ -38,8 +38,14 @@ intersects = function(_arg, _arg1, _arg2, _arg3) {
   }
 };
 
+edgelen = function(_arg) {
+  var x1, x2, y1, y2, _ref, _ref1;
+  (_ref = _arg[0], x1 = _ref[0], y1 = _ref[1]), (_ref1 = _arg[1], x2 = _ref1[0], y2 = _ref1[1]);
+  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+};
+
 newpoints = function(p1, p2, l1, l2) {
-  var discx, discy, lambda, p, q, r, s, w, w2z2, x1, x2, y1, y2, z;
+  var discx, discy, lambda, p, q, r, realL1, realL2, s, w, w2z2, x1, x2, y1, y2, z;
   r = p1[0], s = p1[1];
   p = p2[0], q = p2[1];
   w = p - r;
@@ -50,11 +56,75 @@ newpoints = function(p1, p2, l1, l2) {
   discy = Math.pow(z, 2) * Math.pow(lambda, 2) - 4 * w2z2 * (0.25 * Math.pow(lambda, 2) - Math.pow(w, 2) * Math.pow(l1, 2));
   if (discx < 0 || discy < 0) {
     return [];
+  }
+  if (discx === 0 || discy === 0) {
+    paper.circle(r, s, l1).attr({
+      fill: "none",
+      'stroke-width': 1,
+      'stroke': 'rgba(0,0,255,0.3)'
+    });
+    paper.circle(p, q, l2).attr({
+      fill: "none",
+      'stroke-width': 1,
+      'stroke': 'rgba(0,0,255,0.3)'
+    });
+    console.warn("discx", discx, "discy", discy);
+    return [];
   } else {
     x1 = (w * lambda + Math.sqrt(discx)) / (2 * w2z2);
     x2 = (w * lambda - Math.sqrt(discx)) / (2 * w2z2);
     y1 = (z * lambda + Math.sqrt(discy)) / (2 * w2z2);
     y2 = (z * lambda - Math.sqrt(discy)) / (2 * w2z2);
+    realL1 = edgelen([p1, [x1 + r, y1 + s]]);
+    if (Math.round(l1) !== Math.round(realL1)) {
+      console.error("l1 doesn't match realL1:", realL1);
+      paper.circle(r, s, l1).attr({
+        fill: "none",
+        'stroke-width': 1,
+        'stroke': 'red'
+      });
+      paper.circle(p, q, l2).attr({
+        fill: "none",
+        'stroke-width': 1,
+        'stroke': 'red'
+      });
+      paper.circle(x1 + r, y1 + r, 4).attr({
+        fill: "none",
+        'stroke-width': 1,
+        'stroke': 'green'
+      });
+      paper.circle(x2 + r, y2 + r, 4).attr({
+        fill: "none",
+        'stroke-width': 1,
+        'stroke': 'green'
+      });
+      return [];
+    }
+    realL2 = edgelen([p2, [x2 + r, y2 + s]]);
+    if (Math.round(l2) !== Math.round(realL2)) {
+      console.error("l2 doesn't match realL2:", realL2);
+      paper.circle(r, s, l1).attr({
+        fill: "none",
+        'stroke-width': 1,
+        'stroke': 'red'
+      });
+      paper.circle(p, q, l2).attr({
+        fill: "none",
+        'stroke-width': 1,
+        'stroke': 'red'
+      });
+      paper.circle(x1 + r, y1 + r, 4).attr({
+        fill: "none",
+        'stroke-width': 1,
+        'stroke': 'green'
+      });
+      paper.circle(x2 + r, y2 + r, 4).attr({
+        fill: "none",
+        'stroke-width': 1,
+        'stroke': 'green'
+      });
+      return [];
+    }
     return [[x1 + r, y1 + s], [x2 + r, y2 + s]];
   }
 };
@@ -122,13 +192,7 @@ Graph = (function() {
 
 graph = new Graph([110, 110], [150, 110], [130, 190]);
 
-len = function(_arg) {
-  var x1, x2, y1, y2, _ref, _ref1;
-  (_ref = _arg[0], x1 = _ref[0], y1 = _ref[1]), (_ref1 = _arg[1], x2 = _ref1[0], y2 = _ref1[1]);
-  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-};
-
-dist = new NormalDistribution(len(graph.edges[0]), len(graph.edges[1]), len(graph.edges[2]));
+dist = new NormalDistribution(edgelen(graph.edges[0]), edgelen(graph.edges[1]), edgelen(graph.edges[2]));
 
 paper = new Raphael(document.getElementsByTagName('div')[0], 600, 400);
 
