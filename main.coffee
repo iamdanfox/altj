@@ -38,7 +38,7 @@ edgelen = ([[x1,y1],[x2,y2]]) -> Math.sqrt((x2-x1)**2 + (y2-y1)**2)
 
 # finds new points such that p3 is len1 from p1 and len2 from p2
 # returns two possibilities
-newpoints = (p1,p2,l1,l2) -> # TODO: two errors. discx=0 sometimes. not always returning isosceles!!
+newpoints = (p1,p2,l1,l2) -> # TODO: error discx=0 sometimes.
   [r,s] = p1
   [p,q] = p2
 
@@ -67,27 +67,10 @@ newpoints = (p1,p2,l1,l2) -> # TODO: two errors. discx=0 sometimes. not always r
     y1 = (z*lambda + Math.sqrt(discy)) / (2*w2z2)
     y2 = (z*lambda - Math.sqrt(discy)) / (2*w2z2)
 
-    realL1 = edgelen([p1,[x1+r,y1+s]])
-    if Math.round(l1) isnt Math.round(realL1)
-      console.error "l1 doesn't match realL1:", realL1
-      paper.circle(r, s, l1).attr({fill: "none", 'stroke-width':1, 'stroke':'red'});
-      paper.circle(p, q, l2).attr({fill: "none", 'stroke-width':1, 'stroke':'red'});
-      paper.circle(x1+r, y1+r, 4).attr({fill: "none", 'stroke-width':1, 'stroke':'green'});
-      paper.circle(x2+r, y2+r, 4).attr({fill: "none", 'stroke-width':1, 'stroke':'green'});
-      return []
-
-    realL2 = edgelen([p2,[x2+r,y2+s]])
-    if Math.round(l2) isnt Math.round(realL2)
-      console.error "l2 doesn't match realL2:", realL2
-      paper.circle(r, s, l1).attr({fill: "none", 'stroke-width':1, 'stroke':'red'});
-      paper.circle(p, q, l2).attr({fill: "none", 'stroke-width':1, 'stroke':'red'});
-      paper.circle(x1+r, y1+r, 4).attr({fill: "none", 'stroke-width':1, 'stroke':'green'});
-      paper.circle(x2+r, y2+r, 4).attr({fill: "none", 'stroke-width':1, 'stroke':'green'});
-      return []
-
-    return [[x1+r,y1+s], [x2+r,y2+s]]  # translate away from origin
-
-
+    if Math.round(l1) isnt Math.round(edgelen([p1,[x1+r,y1+s]]))
+      return [[x1+r,y2+s], [x2+r,y1+s]]  # translate away from origin
+    else
+      return [[x1+r,y1+s], [x2+r,y2+s]]  # translate away from origin
 
 
 class NormalDistribution

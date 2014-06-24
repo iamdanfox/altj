@@ -45,7 +45,7 @@ edgelen = function(_arg) {
 };
 
 newpoints = function(p1, p2, l1, l2) {
-  var discx, discy, lambda, p, q, r, realL1, realL2, s, w, w2z2, x1, x2, y1, y2, z;
+  var discx, discy, lambda, p, q, r, s, w, w2z2, x1, x2, y1, y2, z;
   r = p1[0], s = p1[1];
   p = p2[0], q = p2[1];
   w = p - r;
@@ -75,57 +75,11 @@ newpoints = function(p1, p2, l1, l2) {
     x2 = (w * lambda - Math.sqrt(discx)) / (2 * w2z2);
     y1 = (z * lambda + Math.sqrt(discy)) / (2 * w2z2);
     y2 = (z * lambda - Math.sqrt(discy)) / (2 * w2z2);
-    realL1 = edgelen([p1, [x1 + r, y1 + s]]);
-    if (Math.round(l1) !== Math.round(realL1)) {
-      console.error("l1 doesn't match realL1:", realL1);
-      paper.circle(r, s, l1).attr({
-        fill: "none",
-        'stroke-width': 1,
-        'stroke': 'red'
-      });
-      paper.circle(p, q, l2).attr({
-        fill: "none",
-        'stroke-width': 1,
-        'stroke': 'red'
-      });
-      paper.circle(x1 + r, y1 + r, 4).attr({
-        fill: "none",
-        'stroke-width': 1,
-        'stroke': 'green'
-      });
-      paper.circle(x2 + r, y2 + r, 4).attr({
-        fill: "none",
-        'stroke-width': 1,
-        'stroke': 'green'
-      });
-      return [];
+    if (Math.round(l1) !== Math.round(edgelen([p1, [x1 + r, y1 + s]]))) {
+      return [[x1 + r, y2 + s], [x2 + r, y1 + s]];
+    } else {
+      return [[x1 + r, y1 + s], [x2 + r, y2 + s]];
     }
-    realL2 = edgelen([p2, [x2 + r, y2 + s]]);
-    if (Math.round(l2) !== Math.round(realL2)) {
-      console.error("l2 doesn't match realL2:", realL2);
-      paper.circle(r, s, l1).attr({
-        fill: "none",
-        'stroke-width': 1,
-        'stroke': 'red'
-      });
-      paper.circle(p, q, l2).attr({
-        fill: "none",
-        'stroke-width': 1,
-        'stroke': 'red'
-      });
-      paper.circle(x1 + r, y1 + r, 4).attr({
-        fill: "none",
-        'stroke-width': 1,
-        'stroke': 'green'
-      });
-      paper.circle(x2 + r, y2 + r, 4).attr({
-        fill: "none",
-        'stroke-width': 1,
-        'stroke': 'green'
-      });
-      return [];
-    }
-    return [[x1 + r, y1 + s], [x2 + r, y2 + s]];
   }
 };
 
