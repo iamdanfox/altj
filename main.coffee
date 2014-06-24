@@ -38,10 +38,9 @@ edgelen = ([[x1,y1],[x2,y2]]) -> Math.sqrt((x2-x1)**2 + (y2-y1)**2)
 
 # finds new points such that p3 is len1 from p1 and len2 from p2
 # returns two possibilities
-newpoints = (p1,p2,l1,l2) -> # TODO: error discx=0 sometimes.
+newpoints = (p1,p2,l1,l2) ->
   [r,s] = p1
   [p,q] = p2
-
 
   # perform translation to move p1 to origin, simplifies calcs
   w = p-r
@@ -49,17 +48,13 @@ newpoints = (p1,p2,l1,l2) -> # TODO: error discx=0 sometimes.
   w2z2 = w**2 + z**2
   lambda = w2z2 + l1**2 - l2**2
 
+  # fails when two points are exactly horizontal or vertical
   discx = w**2*lambda**2 - 4*w2z2*(0.25*lambda**2 - z**2*l1**2)
   discy = z**2*lambda**2 - 4*w2z2*(0.25*lambda**2 - w**2*l1**2)
 
-
   if discx < 0 or discy < 0
     return []
-  if discx is 0 or discy is 0
-    paper.circle(r, s, l1).attr({fill: "none", 'stroke-width':1, 'stroke':'rgba(0,0,255,0.3)'});
-    paper.circle(p, q, l2).attr({fill: "none", 'stroke-width':1, 'stroke':'rgba(0,0,255,0.3)'});
-    console.warn "discx", discx, "discy", discy
-    return []
+  # discriminant = 0 is allowed if both points are vertical or horizontal
   else
     x1 = (w*lambda + Math.sqrt(discx)) / (2*w2z2) #quadratic formula
     x2 = (w*lambda - Math.sqrt(discx)) / (2*w2z2)
@@ -93,7 +88,6 @@ class NormalDistribution
     # Math.random has mean 0.5 and variance 1/12.
     x = (Math.random() - 0.5)*2*Math.sqrt(3)
     # we need a variable x that has mean 0 and variance 1.
-    return 50 ## TODO REMOVE THIS WHEN THE NEWPOINTS FUNCTION WORKS
     return @stdev*x + @mean
 
 

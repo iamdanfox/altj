@@ -56,20 +56,6 @@ newpoints = function(p1, p2, l1, l2) {
   discy = Math.pow(z, 2) * Math.pow(lambda, 2) - 4 * w2z2 * (0.25 * Math.pow(lambda, 2) - Math.pow(w, 2) * Math.pow(l1, 2));
   if (discx < 0 || discy < 0) {
     return [];
-  }
-  if (discx === 0 || discy === 0) {
-    paper.circle(r, s, l1).attr({
-      fill: "none",
-      'stroke-width': 1,
-      'stroke': 'rgba(0,0,255,0.3)'
-    });
-    paper.circle(p, q, l2).attr({
-      fill: "none",
-      'stroke-width': 1,
-      'stroke': 'rgba(0,0,255,0.3)'
-    });
-    console.warn("discx", discx, "discy", discy);
-    return [];
   } else {
     x1 = (w * lambda + Math.sqrt(discx)) / (2 * w2z2);
     x2 = (w * lambda - Math.sqrt(discx)) / (2 * w2z2);
@@ -93,7 +79,6 @@ NormalDistribution = (function() {
   NormalDistribution.prototype.sample = function() {
     var x;
     x = (Math.random() - 0.5) * 2 * Math.sqrt(3);
-    return 50;
     return this.stdev * x + this.mean;
   };
 
