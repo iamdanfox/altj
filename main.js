@@ -19,7 +19,7 @@ set of points :: (x,y) coordinates
 set of edges [point,point]
 list of exterior points [point,point,point ... point]
  */
-var Graph, NormalDistribution, dist, drawgraph, edgelen, graph, grow, intersects, newpoints, paper,
+var Graph, NormalDistribution, adjacentpoints, dist, distbetween, drawgraph, edgelen, graph, grow, intersects, newpoints, paper,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 intersects = function(_arg, _arg1, _arg2, _arg3) {
@@ -42,6 +42,10 @@ edgelen = function(_arg) {
   var x1, x2, y1, y2, _ref, _ref1;
   (_ref = _arg[0], x1 = _ref[0], y1 = _ref[1]), (_ref1 = _arg[1], x2 = _ref1[0], y2 = _ref1[1]);
   return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+};
+
+distbetween = function(p1, p2) {
+  return edgelen([p1, p2]);
 };
 
 newpoints = function(p1, p2, l1, l2) {
@@ -160,6 +164,22 @@ drawgraph = function() {
   return _results;
 };
 
+adjacentpoints = function(p) {
+  return graph.edges.filter(function(_arg) {
+    var u, v;
+    u = _arg[0], v = _arg[1];
+    return u === p || v === p;
+  }).map(function(_arg) {
+    var u, v;
+    u = _arg[0], v = _arg[1];
+    if (u === p) {
+      return v;
+    } else {
+      return u;
+    }
+  });
+};
+
 grow = function() {
   var i, l1, l2, n1, n2, nps, p1, p2, safeToAdd;
   l1 = dist.sample();
@@ -171,35 +191,19 @@ grow = function() {
   if (nps.length > 0) {
     n1 = nps[0], n2 = nps[1];
     safeToAdd = function(testpoint) {
-      var a, adjp1, adjp2, b, c, leftmost, lower, rightmost, upper, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3;
-      adjp1 = graph.edges.filter(function(_arg) {
-        var u, v;
-        u = _arg[0], v = _arg[1];
-        return u === p1 || v === p1;
-      }).map(function(_arg) {
-        var u, v;
-        u = _arg[0], v = _arg[1];
-        if (u === p1) {
-          return v;
-        } else {
-          return u;
+      var a, adjp1, adjp2, b, c, leftmost, lower, p, rightmost, upper, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3, _ref4;
+      _ref = graph.points;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        p = _ref[_i];
+        if (distbetween(p, testpoint) < 20) {
+          console.log('too close');
+          return false;
         }
-      });
-      adjp2 = graph.edges.filter(function(_arg) {
-        var u, v;
-        u = _arg[0], v = _arg[1];
-        return u === p2 || v === p2;
-      }).map(function(_arg) {
-        var u, v;
-        u = _arg[0], v = _arg[1];
-        if (u === p2) {
-          return v;
-        } else {
-          return u;
-        }
-      });
-      for (_i = 0, _len = adjp1.length; _i < _len; _i++) {
-        c = adjp1[_i];
+      }
+      adjp1 = adjacentpoints(p1);
+      adjp2 = adjacentpoints(p2);
+      for (_j = 0, _len1 = adjp1.length; _j < _len1; _j++) {
+        c = adjp1[_j];
         if (!((__indexOf.call(adjp2, c) >= 0))) {
           continue;
         }
@@ -207,13 +211,13 @@ grow = function() {
         rightmost = Math.max(p1[0], p2[0], c[0]);
         lower = Math.min(p1[1], p2[1], c[1]);
         upper = Math.max(p1[1], p2[1], c[1]);
-        if ((leftmost <= (_ref = testpoint[0]) && _ref <= rightmost) && (lower <= (_ref1 = testpoint[1]) && _ref1 <= upper)) {
+        if ((leftmost <= (_ref1 = testpoint[0]) && _ref1 <= rightmost) && (lower <= (_ref2 = testpoint[1]) && _ref2 <= upper)) {
           return false;
         }
       }
-      _ref2 = graph.edges;
-      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-        _ref3 = _ref2[_j], a = _ref3[0], b = _ref3[1];
+      _ref3 = graph.edges;
+      for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
+        _ref4 = _ref3[_k], a = _ref4[0], b = _ref4[1];
         if (intersects(a, b, testpoint, p1)) {
           return false;
         }
@@ -231,6 +235,7 @@ grow = function() {
       return drawgraph();
     }
   } else {
-    return console.log('failed');
+    console.log('failed');
+    return grow();
   }
 };

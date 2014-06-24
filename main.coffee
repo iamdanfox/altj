@@ -19,8 +19,6 @@ list of exterior points [point,point,point ... point]
 
 ###
 
-# TODO prevent overlaying same point
-# TODO repeat failed "grow" commands
 # TODO: maybe shortcut two points from exterior
 
 
@@ -38,6 +36,7 @@ intersects = ([a,b],[c,d],[p,q],[r,s]) ->
 
 # length of an edge
 edgelen = ([[x1,y1],[x2,y2]]) -> Math.sqrt((x2-x1)**2 + (y2-y1)**2)
+distbetween = (p1,p2) -> edgelen [p1,p2]
 
 # finds new points such that p3 is len1 from p1 and len2 from p2
 # returns two possibilities
@@ -162,6 +161,11 @@ drawgraph = () ->
   #line1 = paper.path("M 20 10 l 100 200")
   #line1.attr({stroke: '#ddd', 'stroke-width': 5});
 
+
+adjacentpoints = (p) -> graph.edges.
+  filter(([u,v]) -> u is p or v is p).
+  map(([u,v]) -> if u is p then v else u)
+
 grow = () ->
   # sample two new lengths
   l1 = dist.sample()
@@ -177,10 +181,15 @@ grow = () ->
     [n1, n2] = nps
 
     safeToAdd = (testpoint) ->
-      # check new point doesn't form 4-sided shape
-      adjp1 = graph.edges.filter(([u,v]) -> u is p1 or v is p1).map(([u,v]) -> if u is p1 then v else u)
-      adjp2 = graph.edges.filter(([u,v]) -> u is p2 or v is p2).map(([u,v]) -> if u is p2 then v else u)
+      # check point isn't already in graph
+      for p in graph.points
+        if distbetween(p, testpoint) < 20
+          console.log 'too close'
+          return false
 
+      # check new point doesn't form 4-sided shape
+      adjp1 = adjacentpoints(p1)
+      adjp2 = adjacentpoints(p2)
       for c in adjp1 when (c in adjp2)
         leftmost = Math.min p1[0],p2[0],c[0]
         rightmost = Math.max p1[0],p2[0],c[0]
@@ -194,6 +203,7 @@ grow = () ->
       for [a,b] in graph.edges
         if intersects(a,b,testpoint,p1) then return false
         if intersects(a,b,testpoint,p2) then return false
+
       return true
 
     if safeToAdd(n2)
@@ -204,4 +214,4 @@ grow = () ->
       drawgraph()
   else
     console.log 'failed'
-    # grow()
+    grow()
