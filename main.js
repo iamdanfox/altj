@@ -19,7 +19,7 @@ set of points :: (x,y) coordinates
 set of edges [point,point]
 list of exterior points [point,point,point ... point]
  */
-var Graph, NormalDistribution, adjacentpoints, augment, dist, distbetween, drawgraph, edgelen, eq, graph, grow, intersects, newpoints, paper, shortcut,
+var Graph, NormalDistribution, adjacentpoints, augment, dist, distbetween, drawgraph, edgelen, eq, graph, grow, growN, intersects, newpoints, paper, shortcut,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 intersects = function(_arg, _arg1, _arg2, _arg3) {
@@ -196,6 +196,15 @@ grow = function() {
     }
   } else {
     return augment();
+  }
+};
+
+growN = function(n) {
+  if (graph.points.length < n) {
+    grow();
+    return setTimeout((function() {
+      return growN(n);
+    }), 20);
   }
 };
 

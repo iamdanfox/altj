@@ -20,6 +20,9 @@ list of exterior points [point,point,point ... point]
 ###
 
 # TODO: better shortcutting (some edges are way too long)
+# TODO: bounds checking
+# TODO: some sort of request animation frame with growing
+# TODO: pan-able canvas
 
 
 # returns true if the line between the first two points intersects the
@@ -180,6 +183,11 @@ grow = () ->
     if not success then augment()
   else
     augment()
+
+growN = (n) ->
+  if graph.points.length < n
+    grow()
+    setTimeout (->growN(n)),20
 
 eq = ([a1,a2],[b1,b2]) -> a1 is b1 and a2 is b2
 
