@@ -10,18 +10,27 @@
 
 <body>
 
-  <canvas width="800px" height="400px" style="border:1px solid red;"></canvas>
 
+
+<div style="height:400px;width:600px;border:1px solid red;margin:0 auto;"></div>
 
 <!-- <script src="main.js"></script> -->
+<script src="raphael-min.js"></script>
 <script type="text/javascript">
-var canvas = document.getElementsByTagName('canvas')[0]
-var ctx=canvas.getContext('2d');
+window.onload = function() {
+    var paper = new Raphael(document.getElementsByTagName('div')[0], 600, 200);
 
-ctx.beginPath();
-ctx.moveTo(10, 10);
-ctx.lineTo(350, 50);
-ctx.stroke();
+        // var circle = paper.circle(100, 100, 80);
+
+    // TODO: origin in centre of paper
+
+    var line = paper.path("M 10 10 l 100 200")
+    var line1 = paper.path("M 20 10 l 100 200")
+
+    line1.attr({stroke: '#ddd', 'stroke-width': 5});
+
+}
+
 
 </script>
 </body>
