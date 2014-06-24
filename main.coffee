@@ -28,22 +28,33 @@ newpoints = (p1,p2,l1,l2) ->
   [r,s] = p1
   [p,q] = p2
 
+  console.log "newpoints: ", p1,p2,l1,l2
+
   # perform translation to move p1 to origin, simplifies calcs
   w = p-r
   z = q-s
 
+  console.log "w", w, "z", z
+
   w2z2 = w**2 + z**2
   lambda = w2z2 + l1**2 - l2**2
+  console.log "lambda", lambda, 'w2+z2', w2z2
 
   # find xs
-  discx = w**2*lambda**2 - 4*w2z2*(0.5*lambda**2 - z**2*l1**2)
+  discx = w**2*lambda**2 - 4*w2z2*(0.25*lambda**2 - z**2*l1**2)
+  if discx < 0 then console.error 'discx < 0'
   x1 = (w*lambda + Math.sqrt(discx)) / (2*w2z2) #quadratic formula
   x2 = (w*lambda - Math.sqrt(discx)) / (2*w2z2)
 
+
+
   # find ys
-  discy = z**2*lambda*2 - 4*w2z2*(0.5*lambda**2 - w**2*l1**2)
+  discy = z**2*lambda**2 - 4*w2z2*(0.25*lambda**2 - w**2*l1**2)
+  if discy < 0 then console.error 'discy < 0'
   y1 = (z*lambda + Math.sqrt(discy)) / (2*w2z2) #quadratic formula
-  y1 = (z*lambda - Math.sqrt(discy)) / (2*w2z2)
+  y2 = (z*lambda - Math.sqrt(discy)) / (2*w2z2)
+
+
 
   return [[x1+r,y1+s], [x2+r,y2+s]]  # translate away from origin
 
@@ -85,7 +96,7 @@ class Graph
     @edges = [[p1,p2], [p2,p3], [p3,p1]]
 
   # returns null
-  extendGraph: (origp1,origp2,newpoint) ->
+  extend: (origp1,origp2,newpoint) ->
     unless origp1 in @points and origp2 in @points
       console.error "extendGraph must extend an existing point"
 
@@ -124,14 +135,36 @@ dist = new NormalDistribution(len(graph.edges[0]),
                               len(graph.edges[1]),
                               len(graph.edges[2]))
 
-window.onload = () ->
-  # initial rendering
-  paper = new Raphael(document.getElementsByTagName('div')[0], 600, 200);
 
+paper = new Raphael(document.getElementsByTagName('div')[0], 600, 200);
+
+window.onload = () -> drawgraph()
+
+drawgraph = () ->
   for [[x1,y1],[x2,y2]] in graph.getEdges()
     paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}")
   #line1 = paper.path("M 20 10 l 100 200")
   #line1.attr({stroke: '#ddd', 'stroke-width': 5});
 
 grow = () ->
-  alert(dist.sample())
+  # sample two new lengths
+  l1 = dist.sample()
+  l2 = dist.sample()
+
+  # randomly select two exterior points to augment
+  i = Math.floor(Math.random()*(graph.exteriors.length - 1))
+  p1 = graph.exteriors[i]
+  p2 = graph.exteriors[i+1]
+
+  # console.log graph.exteriors
+  # console.log i
+  # console.log p1, p2, l1, l2
+  [n1,n2] = newpoints(p1,p2,l1,l2)
+
+  console.log n1,n2
+
+  # TODO intelligently choose between n1 and n2!!!!!
+
+  graph.extend(p1,p2,n1)
+
+  drawgraph()

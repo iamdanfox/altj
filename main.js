@@ -19,23 +19,32 @@ set of points :: (x,y) coordinates
 set of edges [point,point]
 list of exterior points [point,point,point ... point]
  */
-var Graph, NormalDistribution, dist, graph, grow, len, newpoints,
+var Graph, NormalDistribution, dist, drawgraph, graph, grow, len, newpoints, paper,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 newpoints = function(p1, p2, l1, l2) {
-  var discx, discy, lambda, p, q, r, s, w, w2z2, x1, x2, y1, z;
+  var discx, discy, lambda, p, q, r, s, w, w2z2, x1, x2, y1, y2, z;
   r = p1[0], s = p1[1];
   p = p2[0], q = p2[1];
+  console.log("newpoints: ", p1, p2, l1, l2);
   w = p - r;
   z = q - s;
+  console.log("w", w, "z", z);
   w2z2 = Math.pow(w, 2) + Math.pow(z, 2);
   lambda = w2z2 + Math.pow(l1, 2) - Math.pow(l2, 2);
-  discx = Math.pow(w, 2) * Math.pow(lambda, 2) - 4 * w2z2 * (0.5 * Math.pow(lambda, 2) - Math.pow(z, 2) * Math.pow(l1, 2));
+  console.log("lambda", lambda, 'w2+z2', w2z2);
+  discx = Math.pow(w, 2) * Math.pow(lambda, 2) - 4 * w2z2 * (0.25 * Math.pow(lambda, 2) - Math.pow(z, 2) * Math.pow(l1, 2));
+  if (discx < 0) {
+    console.error('discx < 0');
+  }
   x1 = (w * lambda + Math.sqrt(discx)) / (2 * w2z2);
   x2 = (w * lambda - Math.sqrt(discx)) / (2 * w2z2);
-  discy = Math.pow(z, 2) * lambda * 2 - 4 * w2z2 * (0.5 * Math.pow(lambda, 2) - Math.pow(w, 2) * Math.pow(l1, 2));
+  discy = Math.pow(z, 2) * Math.pow(lambda, 2) - 4 * w2z2 * (0.25 * Math.pow(lambda, 2) - Math.pow(w, 2) * Math.pow(l1, 2));
+  if (discy < 0) {
+    console.error('discy < 0');
+  }
   y1 = (z * lambda + Math.sqrt(discy)) / (2 * w2z2);
-  y1 = (z * lambda - Math.sqrt(discy)) / (2 * w2z2);
+  y2 = (z * lambda - Math.sqrt(discy)) / (2 * w2z2);
   return [[x1 + r, y1 + s], [x2 + r, y2 + s]];
 };
 
@@ -69,7 +78,7 @@ Graph = (function() {
     this.edges = [[p1, p2], [p2, p3], [p3, p1]];
   }
 
-  Graph.prototype.extendGraph = function(origp1, origp2, newpoint) {
+  Graph.prototype.extend = function(origp1, origp2, newpoint) {
     var a, b, i, j;
     if (!(__indexOf.call(this.points, origp1) >= 0 && __indexOf.call(this.points, origp2) >= 0)) {
       console.error("extendGraph must extend an existing point");
@@ -109,9 +118,14 @@ len = function(_arg) {
 
 dist = new NormalDistribution(len(graph.edges[0]), len(graph.edges[1]), len(graph.edges[2]));
 
+paper = new Raphael(document.getElementsByTagName('div')[0], 600, 200);
+
 window.onload = function() {
-  var paper, x1, x2, y1, y2, _i, _len, _ref, _ref1, _ref2, _ref3, _results;
-  paper = new Raphael(document.getElementsByTagName('div')[0], 600, 200);
+  return drawgraph();
+};
+
+drawgraph = function() {
+  var x1, x2, y1, y2, _i, _len, _ref, _ref1, _ref2, _ref3, _results;
   _ref = graph.getEdges();
   _results = [];
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -122,5 +136,14 @@ window.onload = function() {
 };
 
 grow = function() {
-  return alert(dist.sample());
+  var i, l1, l2, n1, n2, p1, p2, _ref;
+  l1 = dist.sample();
+  l2 = dist.sample();
+  i = Math.floor(Math.random() * (graph.exteriors.length - 1));
+  p1 = graph.exteriors[i];
+  p2 = graph.exteriors[i + 1];
+  _ref = newpoints(p1, p2, l1, l2), n1 = _ref[0], n2 = _ref[1];
+  console.log(n1, n2);
+  graph.extend(p1, p2, n1);
+  return drawgraph();
 };
