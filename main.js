@@ -19,25 +19,8 @@ set of points :: (x,y) coordinates
 set of edges [point,point]
 list of exterior points [point,point,point ... point]
  */
-var Graph, NormalDistribution, newpoints,
+var Graph, NormalDistribution, dist, graph, grow, len, newpoints,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-window.onload = function() {
-  var edge, graph, p1, p2, p3, paper, x1, x2, y1, y2, _i, _len, _ref, _ref1, _ref2, _results;
-  p1 = [10, 10];
-  p2 = [50, 10];
-  p3 = [30, 90];
-  graph = new Graph(p1, p2, p3);
-  paper = new Raphael(document.getElementsByTagName('div')[0], 600, 200);
-  _ref = graph.getEdges();
-  _results = [];
-  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-    edge = _ref[_i];
-    (_ref1 = edge[0], x1 = _ref1[0], y1 = _ref1[1]), (_ref2 = edge[1], x2 = _ref2[0], y2 = _ref2[1]);
-    _results.push(paper.path("M " + x1 + " " + y1 + " l " + (x2 - x1) + " " + (y2 - y1)));
-  }
-  return _results;
-};
 
 newpoints = function(p1, p2, l1, l2) {
   var discx, discy, lambda, p, q, r, s, w, w2z2, x1, x2, y1, z;
@@ -59,7 +42,7 @@ newpoints = function(p1, p2, l1, l2) {
 NormalDistribution = (function() {
   function NormalDistribution(len1, len2, len3) {
     this.mean = (len1 + len2 + len3) / 3;
-    this.variance = (Math.pow(len1 - mean, 2) + Math.pow(len2 - mean, 2) + Math.pow(len3 - mean, 2)) / 9;
+    this.variance = (Math.pow(len1 - this.mean, 2) + Math.pow(len2 - this.mean, 2) + Math.pow(len3 - this.mean, 2)) / 9;
     this.stdev = Math.sqrt(this.variance);
   }
 
@@ -115,3 +98,29 @@ Graph = (function() {
   return Graph;
 
 })();
+
+graph = new Graph([10, 10], [50, 10], [30, 90]);
+
+len = function(_arg) {
+  var x1, x2, y1, y2, _ref, _ref1;
+  (_ref = _arg[0], x1 = _ref[0], y1 = _ref[1]), (_ref1 = _arg[1], x2 = _ref1[0], y2 = _ref1[1]);
+  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+};
+
+dist = new NormalDistribution(len(graph.edges[0]), len(graph.edges[1]), len(graph.edges[2]));
+
+window.onload = function() {
+  var paper, x1, x2, y1, y2, _i, _len, _ref, _ref1, _ref2, _ref3, _results;
+  paper = new Raphael(document.getElementsByTagName('div')[0], 600, 200);
+  _ref = graph.getEdges();
+  _results = [];
+  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+    _ref1 = _ref[_i], (_ref2 = _ref1[0], x1 = _ref2[0], y1 = _ref2[1]), (_ref3 = _ref1[1], x2 = _ref3[0], y2 = _ref3[1]);
+    _results.push(paper.path("M " + x1 + " " + y1 + " l " + (x2 - x1) + " " + (y2 - y1)));
+  }
+  return _results;
+};
+
+grow = function() {
+  return alert(dist.sample());
+};

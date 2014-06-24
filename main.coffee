@@ -19,26 +19,6 @@ list of exterior points [point,point,point ... point]
 
 ###
 
-window.onload = () ->
-
-  # initial triangle:
-  p1 = [10,10]
-  p2 = [50,10]
-  p3 = [30,90]
-  graph = new Graph(p1,p2,p3)
-
-
-  # rendering
-  paper = new Raphael(document.getElementsByTagName('div')[0], 600, 200);
-
-  for edge in graph.getEdges()
-    [[x1,y1],[x2,y2]] = edge
-    paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}")
-
-
-  # line1 = paper.path("M 20 10 l 100 200")
-  # line1.attr({stroke: '#ddd', 'stroke-width': 5});
-
 
 
 
@@ -77,13 +57,14 @@ class NormalDistribution
 
   # construct a normal distribution given three weights as representative sample
   # uses Central Limit Theorem
-  constructor: (len1, len2, len3) ->
+  constructor: (len1, len2, len3) -> # TODO rewrite to take list
     # If X1,...,Xn is a sample from a distribution with mean, m, and variance,
     # v2, then for large n, the sample mean has approximately a normal
     # distribution with mean m and variance v2/n.
     @mean = (len1+len2+len3) / 3
-    @variance = ((len1-mean)**2 + (len2-mean)**2 + (len3-mean)**2) / 9
+    @variance = ((len1-@mean)**2 + (len2-@mean)**2 + (len3-@mean)**2) / 9
     @stdev = Math.sqrt(@variance)
+
 
   sample: () ->
     # Math.random has mean 0.5 and variance 1/12.
@@ -131,3 +112,26 @@ class Graph
 
   # e.g. e1= [[0,0],[1,1]] e2=[[3,4],[4,5]]  returns: [e1,e2]
   getEdges: () -> @edges
+
+
+
+
+# initial triangle:
+graph = new Graph([10,10],[50,10],[30,90])
+len = ([[x1,y1],[x2,y2]]) -> Math.sqrt((x2-x1)**2 + (y2-y1)**2)
+
+dist = new NormalDistribution(len(graph.edges[0]),
+                              len(graph.edges[1]),
+                              len(graph.edges[2]))
+
+window.onload = () ->
+  # initial rendering
+  paper = new Raphael(document.getElementsByTagName('div')[0], 600, 200);
+
+  for [[x1,y1],[x2,y2]] in graph.getEdges()
+    paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}")
+  #line1 = paper.path("M 20 10 l 100 200")
+  #line1.attr({stroke: '#ddd', 'stroke-width': 5});
+
+grow = () ->
+  alert(dist.sample())
