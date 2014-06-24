@@ -65,7 +65,7 @@ class NormalDistribution
 
   sample: () ->
     # Math.random has mean 0.5 and variance 1/12.
-    x = (Math.random() - 0.5)*Math.sqrt(3)
+    x = (Math.random() - 0.5)*2*Math.sqrt(3)
     # we need a variable x that has mean 0 and variance 1.
     return @stdev*x + @mean
 
