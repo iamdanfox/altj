@@ -1,30 +1,3 @@
-###
-
-1. Get seed triangle from user
-2. Find a MLE distribution on edge lengths.
-3. Choose two length by sampling from distribution
-4. From exterior points of graph: Randomly choose a pair of adjacent points.
-5. Compute extra point
-6. Add new point to data structure (Don't add if edges cross existing ones)
-
-Repeat
-
-
-
-# Data structures
-
-set of points :: (x,y) coordinates
-set of edges [point,point]
-list of exterior points [point,point,point ... point]
-
-###
-
-# TODO: better shortcutting (some edges are way too long)
-# TODO: bounds checking
-# TODO: some sort of request animation frame with growing
-# TODO: pan-able canvas
-
-
 # returns true if the line between the first two points intersects the
 # one between the second two points
 intersects = ([a,b],[c,d],[p,q],[r,s]) ->
@@ -40,6 +13,16 @@ intersects = ([a,b],[c,d],[p,q],[r,s]) ->
 # length of an edge
 edgelen = ([[x1,y1],[x2,y2]]) -> Math.sqrt((x2-x1)**2 + (y2-y1)**2)
 distbetween = (p1,p2) -> edgelen [p1,p2]
+
+eq = ([a1,a2],[b1,b2]) -> a1 is b1 and a2 is b2
+
+intriangle = (p1,p2,p3,testp) ->
+  leftmost = Math.min p1[0],p2[0],p3[0]
+  rightmost = Math.max p1[0],p2[0],p3[0]
+  lower = Math.min p1[1],p2[1],p3[1]
+  upper = Math.max p1[1],p2[1],p3[1]
+  # if testpoint in triangle p1,p2,c return false
+  return leftmost<=testp[0]<=rightmost and lower<=testp[1]<=upper
 
 # finds new points such that p3 is len1 from p1 and len2 from p2
 # returns two possibilities
@@ -143,6 +126,10 @@ class Graph
   # e.g. e1= [[0,0],[1,1]] e2=[[3,4],[4,5]]  returns: [e1,e2]
   getEdges: () -> @edges
 
+  adjacentpoints: (p) ->
+    @edges.filter(([u,v]) -> u is p or v is p).
+      map(([u,v]) -> if u is p then v else u)
+
 
 
 
@@ -173,9 +160,6 @@ drawgraph = () ->
   #line1.attr({stroke: '#ddd', 'stroke-width': 5});
 
 
-adjacentpoints = (p) -> graph.edges.
-  filter(([u,v]) -> u is p or v is p).
-  map(([u,v]) -> if u is p then v else u)
 
 grow = () ->
   if Math.random() > 0.5
@@ -189,7 +173,6 @@ growN = (n) ->
     grow()
     setTimeout (->growN(n)),20
 
-eq = ([a1,a2],[b1,b2]) -> a1 is b1 and a2 is b2
 
 shortcut = () ->
   console.log 'shortcut'
@@ -218,7 +201,6 @@ shortcut = () ->
   console.log 'shortcut success!'
   return true
 
-
 augment = () ->
   # sample two new lengths
   l1 = dist.sample()
@@ -241,16 +223,8 @@ augment = () ->
           return false
 
       # check new point doesn't form 4-sided shape
-      adjp1 = adjacentpoints(p1)
-      adjp2 = adjacentpoints(p2)
-      for c in adjp1 when (c in adjp2)
-        leftmost = Math.min p1[0],p2[0],c[0]
-        rightmost = Math.max p1[0],p2[0],c[0]
-        lower = Math.min p1[1],p2[1],c[1]
-        upper = Math.max p1[1],p2[1],c[1]
-        # if testpoint in triangle p1,p2,c return false
-        if leftmost<=testpoint[0]<=rightmost and lower<=testpoint[1]<=upper
-          return false
+      for c in graph.adjacentpoints(p1) when (c in graph.adjacentpoints(p2))
+        if intriangle(p1,p2,c,testpoint) then return false
 
       # check both new edges don't overlap with anything
       for [a,b] in graph.edges
