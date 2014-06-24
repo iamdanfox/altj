@@ -19,7 +19,7 @@ list of exterior points [point,point,point ... point]
 
 ###
 
-# TODO: maybe shortcut two points from exterior
+# TODO: better shortcutting (some edges are way too long)
 
 
 # returns true if the line between the first two points intersects the
@@ -123,6 +123,14 @@ class Graph
 
     return
 
+  shortcut:(p1,p2,p3) ->
+    # update exterior points
+    j = @exteriors.indexOf(p2) #p2 to be removed
+    @exteriors = @exteriors[0..j-1].concat @exteriors[j+1..]
+
+    # add edge
+    @edges.push([p1,p3])
+
   # list of all points in graph
   getPoints: () -> @points
 
@@ -136,7 +144,7 @@ class Graph
 
 
 # initial triangle:
-graph = new Graph([110,110],[180,110],[130,190])
+graph = new Graph([110,110],[140,110],[130,190])
 
 dist = new NormalDistribution(edgelen(graph.edges[0]),
                               edgelen(graph.edges[1]),
@@ -167,6 +175,43 @@ adjacentpoints = (p) -> graph.edges.
   map(([u,v]) -> if u is p then v else u)
 
 grow = () ->
+  if Math.random() > 0.5
+    success = shortcut()
+    if not success then augment()
+  else
+    augment()
+
+eq = ([a1,a2],[b1,b2]) -> a1 is b1 and a2 is b2
+
+shortcut = () ->
+  console.log 'shortcut'
+  # select two points (with one inbetween) to shortcut
+  i = Math.floor(Math.random()*(graph.exteriors.length - 2))
+  p1 = graph.exteriors[i]
+  p2 = graph.exteriors[i+1]
+  p3 = graph.exteriors[i+2]
+
+  # don't try to add an existing edge
+  for [u,v] in graph.edges
+    if eq(u,p1) and eq(v,p3) then return false
+    if eq(u,p3) and eq(v,p1) then return false
+
+  # check new edge doesn't overlap with anything
+  for [a,b] in graph.edges
+    if intersects(a,b,p1,p3) then return false
+
+  # do the shortcut!
+  graph.shortcut(p1,p2,p3)
+  drawgraph()
+
+  l = paper.path("M #{p1[0]} #{p1[1]} l #{p3[0]-p1[0]} #{p3[1]-p1[1]}")
+  l.attr('stoke','red')
+
+  console.log 'shortcut success!'
+  return true
+
+
+augment = () ->
   # sample two new lengths
   l1 = dist.sample()
   l2 = dist.sample()
@@ -214,4 +259,4 @@ grow = () ->
       drawgraph()
   else
     console.log 'failed'
-    grow()
+    augment()

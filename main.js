@@ -19,7 +19,7 @@ set of points :: (x,y) coordinates
 set of edges [point,point]
 list of exterior points [point,point,point ... point]
  */
-var Graph, NormalDistribution, adjacentpoints, dist, distbetween, drawgraph, edgelen, graph, grow, intersects, newpoints, paper,
+var Graph, NormalDistribution, adjacentpoints, augment, dist, distbetween, drawgraph, edgelen, eq, graph, grow, intersects, newpoints, paper, shortcut,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 intersects = function(_arg, _arg1, _arg2, _arg3) {
@@ -121,6 +121,13 @@ Graph = (function() {
     this.exteriors = this.exteriors.slice(0, +a + 1 || 9e9).concat([newpoint], this.exteriors.slice(b));
   };
 
+  Graph.prototype.shortcut = function(p1, p2, p3) {
+    var j;
+    j = this.exteriors.indexOf(p2);
+    this.exteriors = this.exteriors.slice(0, +(j - 1) + 1 || 9e9).concat(this.exteriors.slice(j + 1));
+    return this.edges.push([p1, p3]);
+  };
+
   Graph.prototype.getPoints = function() {
     return this.points;
   };
@@ -133,7 +140,7 @@ Graph = (function() {
 
 })();
 
-graph = new Graph([110, 110], [180, 110], [130, 190]);
+graph = new Graph([110, 110], [140, 110], [130, 190]);
 
 dist = new NormalDistribution(edgelen(graph.edges[0]), edgelen(graph.edges[1]), edgelen(graph.edges[2]));
 
@@ -181,6 +188,57 @@ adjacentpoints = function(p) {
 };
 
 grow = function() {
+  var success;
+  if (Math.random() > 0.5) {
+    success = shortcut();
+    if (!success) {
+      return augment();
+    }
+  } else {
+    return augment();
+  }
+};
+
+eq = function(_arg, _arg1) {
+  var a1, a2, b1, b2;
+  a1 = _arg[0], a2 = _arg[1];
+  b1 = _arg1[0], b2 = _arg1[1];
+  return a1 === b1 && a2 === b2;
+};
+
+shortcut = function() {
+  var a, b, i, l, p1, p2, p3, u, v, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3;
+  console.log('shortcut');
+  i = Math.floor(Math.random() * (graph.exteriors.length - 2));
+  p1 = graph.exteriors[i];
+  p2 = graph.exteriors[i + 1];
+  p3 = graph.exteriors[i + 2];
+  _ref = graph.edges;
+  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+    _ref1 = _ref[_i], u = _ref1[0], v = _ref1[1];
+    if (eq(u, p1) && eq(v, p3)) {
+      return false;
+    }
+    if (eq(u, p3) && eq(v, p1)) {
+      return false;
+    }
+  }
+  _ref2 = graph.edges;
+  for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+    _ref3 = _ref2[_j], a = _ref3[0], b = _ref3[1];
+    if (intersects(a, b, p1, p3)) {
+      return false;
+    }
+  }
+  graph.shortcut(p1, p2, p3);
+  drawgraph();
+  l = paper.path("M " + p1[0] + " " + p1[1] + " l " + (p3[0] - p1[0]) + " " + (p3[1] - p1[1]));
+  l.attr('stoke', 'red');
+  console.log('shortcut success!');
+  return true;
+};
+
+augment = function() {
   var i, l1, l2, n1, n2, nps, p1, p2, safeToAdd;
   l1 = dist.sample();
   l2 = dist.sample();
@@ -236,6 +294,6 @@ grow = function() {
     }
   } else {
     console.log('failed');
-    return grow();
+    return augment();
   }
 };
