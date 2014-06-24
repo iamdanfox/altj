@@ -21,6 +21,18 @@ list of exterior points [point,point,point ... point]
 
 
 
+# returns true if the line between the first two points intersects the
+# one between the second two points
+intersects = ([a,b],[c,d],[p,q],[r,s]) ->
+  # two intersecting vector lines. solve as a matrix problem.
+  det = (c-a)*(s-q) - (r-p)*(d-b)
+  if det is 0
+    return false # matrix isn't invertible => colinear
+  else
+    lambda = ((s-q)*(r-a) + (p-r)*(s-b)) / det
+    gamma = ((b-d)*(r-a) + (c-a)*(s-b)) / det
+    return 0<lambda<1 and 0<gamma<1
+
 
 # finds new points such that p3 is len1 from p1 and len2 from p2
 # returns two possibilities
@@ -28,35 +40,24 @@ newpoints = (p1,p2,l1,l2) ->
   [r,s] = p1
   [p,q] = p2
 
-  console.log "newpoints: ", p1,p2,l1,l2
-
   # perform translation to move p1 to origin, simplifies calcs
   w = p-r
   z = q-s
-
-  console.log "w", w, "z", z
-
   w2z2 = w**2 + z**2
   lambda = w2z2 + l1**2 - l2**2
-  console.log "lambda", lambda, 'w2+z2', w2z2
 
-  # find xs
   discx = w**2*lambda**2 - 4*w2z2*(0.25*lambda**2 - z**2*l1**2)
-  if discx < 0 then console.error 'discx < 0'
-  x1 = (w*lambda + Math.sqrt(discx)) / (2*w2z2) #quadratic formula
-  x2 = (w*lambda - Math.sqrt(discx)) / (2*w2z2)
-
-
-
-  # find ys
   discy = z**2*lambda**2 - 4*w2z2*(0.25*lambda**2 - w**2*l1**2)
-  if discy < 0 then console.error 'discy < 0'
-  y1 = (z*lambda + Math.sqrt(discy)) / (2*w2z2) #quadratic formula
-  y2 = (z*lambda - Math.sqrt(discy)) / (2*w2z2)
+  if discx < 0 or discy < 0
+    return []
+  else
+    x1 = (w*lambda + Math.sqrt(discx)) / (2*w2z2) #quadratic formula
+    x2 = (w*lambda - Math.sqrt(discx)) / (2*w2z2)
 
+    y1 = (z*lambda + Math.sqrt(discy)) / (2*w2z2)
+    y2 = (z*lambda - Math.sqrt(discy)) / (2*w2z2)
 
-
-  return [[x1+r,y1+s], [x2+r,y2+s]]  # translate away from origin
+    return [[x1+r,y1+s], [x2+r,y2+s]]  # translate away from origin
 
 
 
@@ -128,7 +129,7 @@ class Graph
 
 
 # initial triangle:
-graph = new Graph([10,10],[50,10],[30,90])
+graph = new Graph([110,110],[150,110],[130,190])
 len = ([[x1,y1],[x2,y2]]) -> Math.sqrt((x2-x1)**2 + (y2-y1)**2)
 
 dist = new NormalDistribution(len(graph.edges[0]),
@@ -136,13 +137,20 @@ dist = new NormalDistribution(len(graph.edges[0]),
                               len(graph.edges[2]))
 
 
-paper = new Raphael(document.getElementsByTagName('div')[0], 600, 200);
+paper = new Raphael(document.getElementsByTagName('div')[0], 600, 400);
 
 window.onload = () -> drawgraph()
 
 drawgraph = () ->
+  paper.clear()
+
   for [[x1,y1],[x2,y2]] in graph.getEdges()
     paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}")
+
+  for [x,y] in graph.exteriors
+    circle = paper.circle(x, y, 4);
+    circle.attr({fill: "#f00", 'stroke-width':0});
+
   #line1 = paper.path("M 20 10 l 100 200")
   #line1.attr({stroke: '#ddd', 'stroke-width': 5});
 
@@ -156,15 +164,23 @@ grow = () ->
   p1 = graph.exteriors[i]
   p2 = graph.exteriors[i+1]
 
-  # console.log graph.exteriors
-  # console.log i
-  # console.log p1, p2, l1, l2
-  [n1,n2] = newpoints(p1,p2,l1,l2)
+  nps = newpoints(p1,p2,l1,l2) # can return an empty list if impossible
+  if nps
+    [n1, n2] = nps
 
-  console.log n1,n2
+    safeToAdd = (testpoint) ->
+      return false unless testpoint[0] and testpoint[1] #NaN checks
+      for [a,b] in graph.edges
+        # check both new edges don't overlap with anything
+        if intersects(a,b,testpoint,p1) then return false
+        if intersects(a,b,testpoint,p2) then return false
+      return true
 
-  # TODO intelligently choose between n1 and n2!!!!!
-
-  graph.extend(p1,p2,n1)
-
-  drawgraph()
+    if safeToAdd(n1)
+      graph.extend(p1,p2,n1)
+      drawgraph()
+    else if safeToAdd(n2)
+      graph.extend(p1,p2,n2)
+      drawgraph()
+  else
+    console.log 'impossible'
