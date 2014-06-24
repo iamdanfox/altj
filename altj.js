@@ -2,6 +2,89 @@
 var Graph, NormalDistribution, augment, dist, distbetween, drawgraph, edgelen, eq, graph, grow, growN, intersects, intriangle, newpoints, paper, shortcut,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
+Graph = (function() {
+  Graph.prototype.points = [];
+
+  Graph.prototype.exteriors = [];
+
+  Graph.prototype.edges = [];
+
+  function Graph(p1, p2, p3) {
+    this.points = [p1, p2, p3];
+    this.exteriors = [p1, p2, p3];
+    this.edges = [[p1, p2], [p2, p3], [p3, p1]];
+  }
+
+  Graph.prototype.extend = function(origp1, origp2, newpoint) {
+    var a, b, i, j;
+    if (!(__indexOf.call(this.points, origp1) >= 0 && __indexOf.call(this.points, origp2) >= 0)) {
+      console.error("extendGraph must extend an existing point");
+    }
+    this.points.push(newpoint);
+    this.edges.push([origp1, newpoint]);
+    this.edges.push([newpoint, origp2]);
+    i = this.exteriors.indexOf(origp1);
+    j = this.exteriors.indexOf(origp2);
+    if (!(i - j === 1 || j - i === 1)) {
+      console.error("exterior invariant broken");
+    }
+    a = Math.min(i, j);
+    b = Math.max(i, j);
+    this.exteriors = this.exteriors.slice(0, +a + 1 || 9e9).concat([newpoint], this.exteriors.slice(b));
+  };
+
+  Graph.prototype.shortcut = function(p1, p2, p3) {
+    var j;
+    j = this.exteriors.indexOf(p2);
+    this.exteriors = this.exteriors.slice(0, +(j - 1) + 1 || 9e9).concat(this.exteriors.slice(j + 1));
+    return this.edges.push([p1, p3]);
+  };
+
+  Graph.prototype.getPoints = function() {
+    return this.points;
+  };
+
+  Graph.prototype.getEdges = function() {
+    return this.edges;
+  };
+
+  Graph.prototype.adjacentpoints = function(p) {
+    return this.edges.filter(function(_arg) {
+      var u, v;
+      u = _arg[0], v = _arg[1];
+      return u === p || v === p;
+    }).map(function(_arg) {
+      var u, v;
+      u = _arg[0], v = _arg[1];
+      if (u === p) {
+        return v;
+      } else {
+        return u;
+      }
+    });
+  };
+
+  return Graph;
+
+})();
+
+NormalDistribution = (function() {
+  function NormalDistribution(len1, len2, len3) {
+    this.mean = (len1 + len2 + len3) / 3;
+    this.variance = (Math.pow(len1 - this.mean, 2) + Math.pow(len2 - this.mean, 2) + Math.pow(len3 - this.mean, 2)) / 9;
+    this.stdev = Math.sqrt(this.variance);
+  }
+
+  NormalDistribution.prototype.sample = function() {
+    var x;
+    x = (Math.random() - 0.5) * 2 * Math.sqrt(3);
+    return this.stdev * x + this.mean;
+  };
+
+  return NormalDistribution;
+
+})();
+
 intersects = function(_arg, _arg1, _arg2, _arg3) {
   var a, b, c, d, det, gamma, lambda, p, q, r, s;
   a = _arg[0], b = _arg[1];
@@ -68,89 +151,6 @@ newpoints = function(p1, p2, l1, l2) {
     }
   }
 };
-
-NormalDistribution = (function() {
-  function NormalDistribution(len1, len2, len3) {
-    this.mean = (len1 + len2 + len3) / 3;
-    this.variance = (Math.pow(len1 - this.mean, 2) + Math.pow(len2 - this.mean, 2) + Math.pow(len3 - this.mean, 2)) / 9;
-    this.stdev = Math.sqrt(this.variance);
-  }
-
-  NormalDistribution.prototype.sample = function() {
-    var x;
-    x = (Math.random() - 0.5) * 2 * Math.sqrt(3);
-    return this.stdev * x + this.mean;
-  };
-
-  return NormalDistribution;
-
-})();
-
-Graph = (function() {
-  Graph.prototype.points = [];
-
-  Graph.prototype.exteriors = [];
-
-  Graph.prototype.edges = [];
-
-  function Graph(p1, p2, p3) {
-    this.points = [p1, p2, p3];
-    this.exteriors = [p1, p2, p3];
-    this.edges = [[p1, p2], [p2, p3], [p3, p1]];
-  }
-
-  Graph.prototype.extend = function(origp1, origp2, newpoint) {
-    var a, b, i, j;
-    if (!(__indexOf.call(this.points, origp1) >= 0 && __indexOf.call(this.points, origp2) >= 0)) {
-      console.error("extendGraph must extend an existing point");
-    }
-    this.points.push(newpoint);
-    this.edges.push([origp1, newpoint]);
-    this.edges.push([newpoint, origp2]);
-    i = this.exteriors.indexOf(origp1);
-    j = this.exteriors.indexOf(origp2);
-    if (!(i - j === 1 || j - i === 1)) {
-      console.error("exterior invariant broken");
-    }
-    a = Math.min(i, j);
-    b = Math.max(i, j);
-    this.exteriors = this.exteriors.slice(0, +a + 1 || 9e9).concat([newpoint], this.exteriors.slice(b));
-  };
-
-  Graph.prototype.shortcut = function(p1, p2, p3) {
-    var j;
-    j = this.exteriors.indexOf(p2);
-    this.exteriors = this.exteriors.slice(0, +(j - 1) + 1 || 9e9).concat(this.exteriors.slice(j + 1));
-    return this.edges.push([p1, p3]);
-  };
-
-  Graph.prototype.getPoints = function() {
-    return this.points;
-  };
-
-  Graph.prototype.getEdges = function() {
-    return this.edges;
-  };
-
-  Graph.prototype.adjacentpoints = function(p) {
-    return this.edges.filter(function(_arg) {
-      var u, v;
-      u = _arg[0], v = _arg[1];
-      return u === p || v === p;
-    }).map(function(_arg) {
-      var u, v;
-      u = _arg[0], v = _arg[1];
-      if (u === p) {
-        return v;
-      } else {
-        return u;
-      }
-    });
-  };
-
-  return Graph;
-
-})();
 
 graph = new Graph([110, 110], [140, 110], [130, 190]);
 
