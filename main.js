@@ -69,6 +69,7 @@ NormalDistribution = (function() {
   NormalDistribution.prototype.sample = function() {
     var x;
     x = (Math.random() - 0.5) * 2 * Math.sqrt(3);
+    return 50;
     return this.stdev * x + this.mean;
   };
 
@@ -160,7 +161,6 @@ grow = function() {
   var i, l1, l2, n1, n2, nps, p1, p2, safeToAdd;
   l1 = dist.sample();
   l2 = dist.sample();
-  console.log(l1, l2);
   i = Math.floor(Math.random() * (graph.exteriors.length - 1));
   p1 = graph.exteriors[i];
   p2 = graph.exteriors[i + 1];

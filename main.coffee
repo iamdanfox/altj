@@ -82,6 +82,7 @@ class NormalDistribution
     # Math.random has mean 0.5 and variance 1/12.
     x = (Math.random() - 0.5)*2*Math.sqrt(3)
     # we need a variable x that has mean 0 and variance 1.
+    return 50 ## TODO REMOVE THIS WHEN THE NEWPOINTS FUNCTION WORKS
     return @stdev*x + @mean
 
 
@@ -158,8 +159,6 @@ grow = () ->
   # sample two new lengths
   l1 = dist.sample()
   l2 = dist.sample()
-
-  console.log l1,l2
 
   # randomly select two exterior points to augment
   i = Math.floor(Math.random()*(graph.exteriors.length - 1))
