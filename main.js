@@ -160,17 +160,15 @@ grow = function() {
   var i, l1, l2, n1, n2, nps, p1, p2, safeToAdd;
   l1 = dist.sample();
   l2 = dist.sample();
+  console.log(l1, l2);
   i = Math.floor(Math.random() * (graph.exteriors.length - 1));
   p1 = graph.exteriors[i];
   p2 = graph.exteriors[i + 1];
   nps = newpoints(p1, p2, l1, l2);
-  if (nps) {
+  if (nps.length > 0) {
     n1 = nps[0], n2 = nps[1];
     safeToAdd = function(testpoint) {
       var a, b, _i, _len, _ref, _ref1;
-      if (!(testpoint[0] && testpoint[1])) {
-        return false;
-      }
       _ref = graph.edges;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         _ref1 = _ref[_i], a = _ref1[0], b = _ref1[1];
@@ -183,11 +181,11 @@ grow = function() {
       }
       return true;
     };
-    if (safeToAdd(n1)) {
-      graph.extend(p1, p2, n1);
-      return drawgraph();
-    } else if (safeToAdd(n2)) {
+    if (safeToAdd(n2)) {
       graph.extend(p1, p2, n2);
+      return drawgraph();
+    } else if (safeToAdd(n1)) {
+      graph.extend(p1, p2, n1);
       return drawgraph();
     }
   } else {

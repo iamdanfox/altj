@@ -159,28 +159,30 @@ grow = () ->
   l1 = dist.sample()
   l2 = dist.sample()
 
+  console.log l1,l2
+
   # randomly select two exterior points to augment
   i = Math.floor(Math.random()*(graph.exteriors.length - 1))
   p1 = graph.exteriors[i]
   p2 = graph.exteriors[i+1]
 
   nps = newpoints(p1,p2,l1,l2) # can return an empty list if impossible
-  if nps
+  if nps.length > 0
     [n1, n2] = nps
 
     safeToAdd = (testpoint) ->
-      return false unless testpoint[0] and testpoint[1] #NaN checks
+      # return false if isNaN(testpoint[0]) or isNaN(testpoint[1]) #NaN checks
       for [a,b] in graph.edges
         # check both new edges don't overlap with anything
         if intersects(a,b,testpoint,p1) then return false
         if intersects(a,b,testpoint,p2) then return false
       return true
 
-    if safeToAdd(n1)
-      graph.extend(p1,p2,n1)
-      drawgraph()
-    else if safeToAdd(n2)
+    if safeToAdd(n2)
       graph.extend(p1,p2,n2)
+      drawgraph()
+    else if safeToAdd(n1)
+      graph.extend(p1,p2,n1)
       drawgraph()
   else
     console.log 'impossible'
