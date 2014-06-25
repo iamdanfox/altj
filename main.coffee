@@ -25,12 +25,10 @@ drawgraph = () ->
     # console.log "M #{x1} #{y1} l #{x2-x1} #{y2-y1}"
     paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}")
 
-  for [x,y] in graph.exteriors
-    circle = paper.circle(x, y, 4);
-    circle.attr({fill: "#f00", 'stroke-width':0});
-
-  #line1 = paper.path("M 20 10 l 100 200")
-  #line1.attr({stroke: '#ddd', 'stroke-width': 5});
+  #Red dot for each exterior node
+  # for [x,y] in graph.exteriors
+  #   circle = paper.circle(x, y, 4);
+  #   circle.attr({fill: "#f00", 'stroke-width':0});
 
 
 
@@ -42,9 +40,13 @@ grow = () ->
     augment()
 
 growN = (n) ->
-  if graph.points.length < n
-    grow()
-    setTimeout (->growN(n)),20
+  target = graph.points.length + n
+
+  cont = () ->
+    if graph.points.length < target then grow()
+    setTimeout cont, 5
+
+  cont()
 
 
 shortcut = () ->

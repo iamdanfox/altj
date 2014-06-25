@@ -172,22 +172,13 @@ window.onload = function() {
 };
 
 drawgraph = function() {
-  var circle, x, x1, x2, y, y1, y2, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _results;
+  var x1, x2, y1, y2, _i, _len, _ref, _ref1, _ref2, _ref3, _results;
   paper.clear();
   _ref = graph.getEdges();
+  _results = [];
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
     _ref1 = _ref[_i], (_ref2 = _ref1[0], x1 = _ref2[0], y1 = _ref2[1]), (_ref3 = _ref1[1], x2 = _ref3[0], y2 = _ref3[1]);
-    paper.path("M " + x1 + " " + y1 + " l " + (x2 - x1) + " " + (y2 - y1));
-  }
-  _ref4 = graph.exteriors;
-  _results = [];
-  for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
-    _ref5 = _ref4[_j], x = _ref5[0], y = _ref5[1];
-    circle = paper.circle(x, y, 4);
-    _results.push(circle.attr({
-      fill: "#f00",
-      'stroke-width': 0
-    }));
+    _results.push(paper.path("M " + x1 + " " + y1 + " l " + (x2 - x1) + " " + (y2 - y1)));
   }
   return _results;
 };
@@ -205,12 +196,15 @@ grow = function() {
 };
 
 growN = function(n) {
-  if (graph.points.length < n) {
-    grow();
-    return setTimeout((function() {
-      return growN(n);
-    }), 20);
-  }
+  var cont, target;
+  target = graph.points.length + n;
+  cont = function() {
+    if (graph.points.length < target) {
+      grow();
+    }
+    return setTimeout(cont, 5);
+  };
+  return cont();
 };
 
 shortcut = function() {
