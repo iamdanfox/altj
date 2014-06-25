@@ -9,7 +9,9 @@ dist = new NormalDistribution(edgelen(graph.edges[0]),
 
 paper = new Raphael(document.getElementsByTagName('div')[0], 600, 400);
 
-window.onload = () -> drawgraph()
+window.onload = () ->
+  paper.ZPD({ zoom: true, pan: true, drag: true });
+  drawgraph()
 
 drawgraph = () ->
   paper.clear()

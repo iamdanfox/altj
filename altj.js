@@ -159,6 +159,13 @@ dist = new NormalDistribution(edgelen(graph.edges[0]), edgelen(graph.edges[1]), 
 paper = new Raphael(document.getElementsByTagName('div')[0], 600, 400);
 
 window.onload = function() {
+  alert('hi');
+  console.log(paper);
+  paper.ZPD({
+    zoom: true,
+    pan: true,
+    drag: true
+  });
   return drawgraph();
 };
 
