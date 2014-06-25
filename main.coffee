@@ -1,13 +1,18 @@
 
 # initial triangle:
-graph = new Graph([110,110],[140,110],[130,190])
+w = document.body.clientWidth
+h = document.body.clientHeight
+
+graph = new Graph([w/2+0,h/3+0],
+                  [w/2+40,h/3+10],
+                  [w/2+30,h/3+90])
 
 dist = new NormalDistribution(edgelen(graph.edges[0]),
                               edgelen(graph.edges[1]),
                               edgelen(graph.edges[2]))
 
 
-paper = new Raphael(document.getElementsByTagName('div')[0], 600, 400);
+paper = new Raphael(document.getElementsByTagName('div')[0],w,h);
 
 window.onload = () ->
   paper.ZPD({ zoom: true, pan: true, drag: true });
