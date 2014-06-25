@@ -13,7 +13,7 @@ dist = new NormalDistribution(edgelen(graph.edges[0]),
 
 
 paper = new Raphael(document.getElementById('raphael'),w,h);
-paper2 = new Raphael(document.getElementById('dist-graph'),300,200)
+paper2 = new Raphael(document.getElementById('dist-graph'),500,200)
 
 window.onload = () ->
   paper.ZPD({ zoom: true, pan: true, drag: true });
@@ -29,14 +29,32 @@ drawgraph = () ->
 
   # do histogram thing
   paper2.clear()
-  paper2.text(  0,190,Math.round(dist.mean-3*dist.stdev))
-  paper2.text(100,190,Math.round(dist.mean-1*dist.stdev))
-  paper2.text(150,190,Math.round(dist.mean))
-  paper2.path("M 150 0 l 0 200").attr('stroke','white')
-  paper2.text(200,190,Math.round(dist.mean+2*dist.stdev))
-  paper2.text(300,190,Math.round(dist.mean+3*dist.stdev))
-  paper2.path("M 150 10 S 180 10 190 100 210 190 300 190").attr('stroke','white')
-  paper2.path("M 150 10 S 120 10 110 100 90 190 0 190").attr('stroke','white')
+  # paper2.text(  0,190,Math.round(dist.mean-3*dist.stdev))
+  # paper2.text(100,190,Math.round(dist.mean-1*dist.stdev))
+  # paper2.text(150,190,Math.round(dist.mean))
+  # paper2.path("M 150 0 l 0 200").attr('stroke','white')
+  # paper2.text(200,190,Math.round(dist.mean+2*dist.stdev))
+  # paper2.text(300,190,Math.round(dist.mean+3*dist.stdev))
+
+  bucketsize = 5
+  histogram = {}
+  for edge in graph.edges
+    l = Math.floor(edgelen edge)
+    b = l - (l % bucketsize)
+    histogram[b] = if histogram[b]?  then histogram[b] + 1 else histogram[b] = 1
+
+  console.debug histogram
+
+  # for bucket in histogram
+  offset = -3*bucketsize
+  for key, val of histogram
+    h = val*3
+    paper2.rect(offset+key*2.2,190-h,bucketsize*2,h).attr('fill':'black', stroke:'none')
+
+  # overlay normal
+  # paper2.path("M 150 10 S 180 10 190 100 210 190 300 190").attr('stroke','white')
+  # paper2.path("M 150 10 S 120 10 110 100 90 190 0 190").attr('stroke','white')
+
 
   #Red dot for each exterior node
   # for [x,y] in graph.exteriors

@@ -162,7 +162,7 @@ dist = new NormalDistribution(edgelen(graph.edges[0]), edgelen(graph.edges[1]), 
 
 paper = new Raphael(document.getElementById('raphael'), w, h);
 
-paper2 = new Raphael(document.getElementById('dist-graph'), 300, 200);
+paper2 = new Raphael(document.getElementById('dist-graph'), 500, 200);
 
 window.onload = function() {
   paper.ZPD({
@@ -174,7 +174,7 @@ window.onload = function() {
 };
 
 drawgraph = function() {
-  var x1, x2, y1, y2, _i, _len, _ref, _ref1, _ref2, _ref3;
+  var b, bucketsize, edge, histogram, key, l, offset, val, x1, x2, y1, y2, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4, _results;
   paper.clear();
   _ref = graph.getEdges();
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -182,14 +182,27 @@ drawgraph = function() {
     paper.path("M " + x1 + " " + y1 + " l " + (x2 - x1) + " " + (y2 - y1)).attr('stroke', 'black');
   }
   paper2.clear();
-  paper2.text(0, 190, Math.round(dist.mean - 3 * dist.stdev));
-  paper2.text(100, 190, Math.round(dist.mean - 1 * dist.stdev));
-  paper2.text(150, 190, Math.round(dist.mean));
-  paper2.path("M 150 0 l 0 200").attr('stroke', 'white');
-  paper2.text(200, 190, Math.round(dist.mean + 2 * dist.stdev));
-  paper2.text(300, 190, Math.round(dist.mean + 3 * dist.stdev));
-  paper2.path("M 150 10 S 180 10 190 100 210 190 300 190").attr('stroke', 'white');
-  return paper2.path("M 150 10 S 120 10 110 100 90 190 0 190").attr('stroke', 'white');
+  bucketsize = 5;
+  histogram = {};
+  _ref4 = graph.edges;
+  for (_j = 0, _len1 = _ref4.length; _j < _len1; _j++) {
+    edge = _ref4[_j];
+    l = Math.floor(edgelen(edge));
+    b = l - (l % bucketsize);
+    histogram[b] = histogram[b] != null ? histogram[b] + 1 : histogram[b] = 1;
+  }
+  console.debug(histogram);
+  offset = -3 * bucketsize;
+  _results = [];
+  for (key in histogram) {
+    val = histogram[key];
+    h = val * 3;
+    _results.push(paper2.rect(offset + key * 2.2, 190 - h, bucketsize * 2, h).attr({
+      'fill': 'black',
+      stroke: 'none'
+    }));
+  }
+  return _results;
 };
 
 grow = function() {
