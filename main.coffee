@@ -16,7 +16,7 @@ paper = new Raphael(document.getElementById('raphael'),w,h);
 paper2 = new Raphael(document.getElementById('dist-graph'),500,200)
 
 window.onload = () ->
-  paper.ZPD({ zoom: true, pan: true, drag: true });
+  paper.ZPD({ zoom: true, pan: true, drag: false });
   drawgraph()
 
 drawgraph = () ->

@@ -168,7 +168,7 @@ window.onload = function() {
   paper.ZPD({
     zoom: true,
     pan: true,
-    drag: true
+    drag: false
   });
   return drawgraph();
 };
