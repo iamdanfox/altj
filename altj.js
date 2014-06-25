@@ -178,7 +178,7 @@ drawgraph = function() {
   _results = [];
   for (_i = 0, _len = _ref.length; _i < _len; _i++) {
     _ref1 = _ref[_i], (_ref2 = _ref1[0], x1 = _ref2[0], y1 = _ref2[1]), (_ref3 = _ref1[1], x2 = _ref3[0], y2 = _ref3[1]);
-    _results.push(paper.path("M " + x1 + " " + y1 + " l " + (x2 - x1) + " " + (y2 - y1)));
+    _results.push(paper.path("M " + x1 + " " + y1 + " l " + (x2 - x1) + " " + (y2 - y1)).attr('stroke', 'black'));
   }
   return _results;
 };

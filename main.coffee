@@ -23,7 +23,7 @@ drawgraph = () ->
 
   for [[x1,y1],[x2,y2]] in graph.getEdges()
     # console.log "M #{x1} #{y1} l #{x2-x1} #{y2-y1}"
-    paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}")
+    paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}").attr('stroke','black')
 
   #Red dot for each exterior node
   # for [x,y] in graph.exteriors
