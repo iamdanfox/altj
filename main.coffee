@@ -147,6 +147,8 @@ augment = () ->
     else if safeToAdd(n1)
       graph.extend(p1,p2,n1)
       drawgraph()
+    else
+      augment()
   else
     console.log 'failed'
     augment()
