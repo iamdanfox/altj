@@ -61,15 +61,15 @@ drawgraph = () ->
 
 
 
-
+AUGMENT_PROPORTION = 0.75
 
 grow = () ->
-  # if Math.random() > 0.2
+  if Math.random() > AUGMENT_PROPORTION # good values: 0.8 or 0.7
     success = shortcut()
     if not success
       augment()
-  # else
-    # augment()
+  else
+    augment()
 
 growN = (n) ->
   target = graph.points.length + n
