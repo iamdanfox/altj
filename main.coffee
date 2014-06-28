@@ -84,11 +84,18 @@ growN = (n) ->
 
 shortcut = () ->
   console.log 'shortcut'
-  # select two points (with one inbetween) to shortcut
-  i = Math.floor(Math.random()*(graph.exteriors.length - 2))
-  p1 = graph.exteriors[i]
-  p2 = graph.exteriors[i+1]
-  p3 = graph.exteriors[i+2]
+
+  # select two random points (with one inbetween) to shortcut
+  # i = Math.floor(Math.random()*(graph.exteriors.length - 2))
+  # [p1,p2,p3] = graph.exteriors[i..i+2]
+
+  # choose shortest possible shortcut
+  bestshortcut = Infinity
+  for i in [0...graph.exteriors.length-2]
+    d = distbetween(graph.exteriors[i], graph.exteriors[i+2])
+    if d < bestshortcut
+      bestshortcut = d
+      [p1,p2,p3] = graph.exteriors[i..i+2] # hoists vars for later
 
   # don't try to add an existing edge
   for [u,v] in graph.edges
@@ -102,9 +109,6 @@ shortcut = () ->
   # do the shortcut!
   graph.shortcut(p1,p2,p3)
   drawgraph()
-
-  l = paper.path("M #{p1[0]} #{p1[1]} l #{p3[0]-p1[0]} #{p3[1]-p1[1]}")
-  l.attr('stoke','red')
 
   console.log 'shortcut success!'
   return true

@@ -230,15 +230,19 @@ growN = function(n) {
 };
 
 shortcut = function() {
-  var a, b, i, l, p1, p2, p3, u, v, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3;
+  var a, b, bestshortcut, d, i, p1, p2, p3, u, v, _i, _j, _k, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
   console.log('shortcut');
-  i = Math.floor(Math.random() * (graph.exteriors.length - 2));
-  p1 = graph.exteriors[i];
-  p2 = graph.exteriors[i + 1];
-  p3 = graph.exteriors[i + 2];
-  _ref = graph.edges;
-  for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-    _ref1 = _ref[_i], u = _ref1[0], v = _ref1[1];
+  bestshortcut = Infinity;
+  for (i = _i = 0, _ref = graph.exteriors.length - 2; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+    d = distbetween(graph.exteriors[i], graph.exteriors[i + 2]);
+    if (d < bestshortcut) {
+      bestshortcut = d;
+      _ref1 = graph.exteriors.slice(i, +(i + 2) + 1 || 9e9), p1 = _ref1[0], p2 = _ref1[1], p3 = _ref1[2];
+    }
+  }
+  _ref2 = graph.edges;
+  for (_j = 0, _len = _ref2.length; _j < _len; _j++) {
+    _ref3 = _ref2[_j], u = _ref3[0], v = _ref3[1];
     if (eq(u, p1) && eq(v, p3)) {
       return false;
     }
@@ -246,17 +250,15 @@ shortcut = function() {
       return false;
     }
   }
-  _ref2 = graph.edges;
-  for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-    _ref3 = _ref2[_j], a = _ref3[0], b = _ref3[1];
+  _ref4 = graph.edges;
+  for (_k = 0, _len1 = _ref4.length; _k < _len1; _k++) {
+    _ref5 = _ref4[_k], a = _ref5[0], b = _ref5[1];
     if (intersects(a, b, p1, p3)) {
       return false;
     }
   }
   graph.shortcut(p1, p2, p3);
   drawgraph();
-  l = paper.path("M " + p1[0] + " " + p1[1] + " l " + (p3[0] - p1[0]) + " " + (p3[1] - p1[1]));
-  l.attr('stoke', 'red');
   console.log('shortcut success!');
   return true;
 };
