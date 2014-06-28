@@ -45,6 +45,12 @@ class Graph
   # e.g. e1= [[0,0],[1,1]] e2=[[3,4],[4,5]]  returns: [e1,e2]
   getEdges: () -> @edges
 
+  hasEdge: ([p1,p2]) ->
+    for [u,v] in @edges
+      if eq(u,p1) and eq(v,p2) then return true
+      if eq(u,p2) and eq(v,p1) then return true
+    return false
+
   adjacentpoints: (p) ->
     @edges.filter(([u,v]) -> u is p or v is p).
       map(([u,v]) -> if u is p then v else u)

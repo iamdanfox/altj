@@ -48,6 +48,22 @@ Graph = (function() {
     return this.edges;
   };
 
+  Graph.prototype.hasEdge = function(_arg) {
+    var p1, p2, u, v, _i, _len, _ref, _ref1;
+    p1 = _arg[0], p2 = _arg[1];
+    _ref = this.edges;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      _ref1 = _ref[_i], u = _ref1[0], v = _ref1[1];
+      if (eq(u, p1) && eq(v, p2)) {
+        return true;
+      }
+      if (eq(u, p2) && eq(v, p1)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   Graph.prototype.adjacentpoints = function(p) {
     return this.edges.filter(function(_arg) {
       var u, v;
@@ -191,7 +207,6 @@ drawgraph = function() {
     b = l - (l % bucketsize);
     histogram[b] = histogram[b] != null ? histogram[b] + 1 : histogram[b] = 1;
   }
-  console.debug(histogram);
   offset = -3 * bucketsize;
   _results = [];
   for (key in histogram) {
@@ -207,12 +222,8 @@ drawgraph = function() {
 
 grow = function() {
   var success;
-  if (Math.random() > 0.5) {
-    success = shortcut();
-    if (!success) {
-      return augment();
-    }
-  } else {
+  success = shortcut();
+  if (!success) {
     return augment();
   }
 };
@@ -230,37 +241,39 @@ growN = function(n) {
 };
 
 shortcut = function() {
-  var a, b, bestshortcut, d, i, p1, p2, p3, u, v, _i, _j, _k, _len, _len1, _ref, _ref1, _ref2, _ref3, _ref4, _ref5;
-  console.log('shortcut');
+  var bestshortcut, d, i, nointersections, p1, p2, p3, t1, t2, t3, _i, _ref, _ref1, _ref2;
+  if (graph.edges.length < 6) {
+    return false;
+  }
   bestshortcut = Infinity;
   for (i = _i = 0, _ref = graph.exteriors.length - 2; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-    d = distbetween(graph.exteriors[i], graph.exteriors[i + 2]);
-    if (d < bestshortcut) {
+    _ref1 = graph.exteriors.slice(i, +(i + 2) + 1 || 9e9), t1 = _ref1[0], t2 = _ref1[1], t3 = _ref1[2];
+    d = distbetween(t1, t3);
+    nointersections = function() {
+      var a, b, _j, _len, _ref2, _ref3;
+      _ref2 = graph.edges;
+      for (_j = 0, _len = _ref2.length; _j < _len; _j++) {
+        _ref3 = _ref2[_j], a = _ref3[0], b = _ref3[1];
+        if (intersects(a, b, t1, t3)) {
+          return false;
+        }
+      }
+      return true;
+    };
+    if (d < bestshortcut && !graph.hasEdge([t1, t3]) && nointersections()) {
       bestshortcut = d;
-      _ref1 = graph.exteriors.slice(i, +(i + 2) + 1 || 9e9), p1 = _ref1[0], p2 = _ref1[1], p3 = _ref1[2];
+      _ref2 = [t1, t2, t3], p1 = _ref2[0], p2 = _ref2[1], p3 = _ref2[2];
     }
   }
-  _ref2 = graph.edges;
-  for (_j = 0, _len = _ref2.length; _j < _len; _j++) {
-    _ref3 = _ref2[_j], u = _ref3[0], v = _ref3[1];
-    if (eq(u, p1) && eq(v, p3)) {
-      return false;
-    }
-    if (eq(u, p3) && eq(v, p1)) {
-      return false;
-    }
+  if (bestshortcut < Infinity) {
+    graph.shortcut(p1, p2, p3);
+    drawgraph();
+    console.log('shortcut success!');
+    return true;
+  } else {
+    console.log('convex');
+    return false;
   }
-  _ref4 = graph.edges;
-  for (_k = 0, _len1 = _ref4.length; _k < _len1; _k++) {
-    _ref5 = _ref4[_k], a = _ref5[0], b = _ref5[1];
-    if (intersects(a, b, p1, p3)) {
-      return false;
-    }
-  }
-  graph.shortcut(p1, p2, p3);
-  drawgraph();
-  console.log('shortcut success!');
-  return true;
 };
 
 augment = function() {
@@ -279,7 +292,6 @@ augment = function() {
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         p = _ref[_i];
         if (distbetween(p, testpoint) < 20) {
-          console.log('too close');
           return false;
         }
       }
@@ -306,15 +318,16 @@ augment = function() {
     };
     if (safeToAdd(n2)) {
       graph.extend(p1, p2, n2);
+      console.log('augmented');
       return drawgraph();
     } else if (safeToAdd(n1)) {
       graph.extend(p1, p2, n1);
+      console.log('augmented');
       return drawgraph();
     } else {
       return augment();
     }
   } else {
-    console.log('failed');
     return augment();
   }
 };

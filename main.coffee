@@ -43,8 +43,6 @@ drawgraph = () ->
     b = l - (l % bucketsize)
     histogram[b] = if histogram[b]?  then histogram[b] + 1 else histogram[b] = 1
 
-  console.debug histogram
-
   # for bucket in histogram
   offset = -3*bucketsize
   for key, val of histogram
@@ -66,11 +64,12 @@ drawgraph = () ->
 
 
 grow = () ->
-  if Math.random() > 0.5
+  # if Math.random() > 0.2
     success = shortcut()
-    if not success then augment()
-  else
-    augment()
+    if not success
+      augment()
+  # else
+    # augment()
 
 growN = (n) ->
   target = graph.points.length + n
@@ -83,7 +82,8 @@ growN = (n) ->
 
 
 shortcut = () ->
-  console.log 'shortcut'
+  # console.log 'shortcut'
+  if graph.edges.length < 6 then return false
 
   # select two random points (with one inbetween) to shortcut
   # i = Math.floor(Math.random()*(graph.exteriors.length - 2))
@@ -92,26 +92,26 @@ shortcut = () ->
   # choose shortest possible shortcut
   bestshortcut = Infinity
   for i in [0...graph.exteriors.length-2]
-    d = distbetween(graph.exteriors[i], graph.exteriors[i+2])
-    if d < bestshortcut
+    [t1,t2,t3] = graph.exteriors[i..i+2]
+    d = distbetween(t1,t3)
+    # check new edge doesn't overlap with anything
+    nointersections = () ->
+      for [a,b] in graph.edges
+        if intersects(a,b,t1,t3) then return false
+      return true
+    if d < bestshortcut and not graph.hasEdge([t1,t3]) and nointersections()
       bestshortcut = d
-      [p1,p2,p3] = graph.exteriors[i..i+2] # hoists vars for later
-
-  # don't try to add an existing edge
-  for [u,v] in graph.edges
-    if eq(u,p1) and eq(v,p3) then return false
-    if eq(u,p3) and eq(v,p1) then return false
-
-  # check new edge doesn't overlap with anything
-  for [a,b] in graph.edges
-    if intersects(a,b,p1,p3) then return false
+      [p1,p2,p3] = [t1,t2,t3] # hoists vars for later
 
   # do the shortcut!
-  graph.shortcut(p1,p2,p3)
-  drawgraph()
-
-  console.log 'shortcut success!'
-  return true
+  if bestshortcut < Infinity
+    graph.shortcut(p1,p2,p3)
+    drawgraph()
+    console.log 'shortcut success!'
+    return true
+  else
+    console.log 'convex'
+    return false
 
 augment = () ->
   # sample two new lengths
@@ -131,7 +131,6 @@ augment = () ->
       # check point isn't already in graph
       for p in graph.points
         if distbetween(p, testpoint) < 20
-          console.log 'too close'
           return false
 
       # check new point doesn't form 4-sided shape
@@ -147,12 +146,13 @@ augment = () ->
 
     if safeToAdd(n2)
       graph.extend(p1,p2,n2)
+      console.log 'augmented'
       drawgraph()
     else if safeToAdd(n1)
       graph.extend(p1,p2,n1)
+      console.log 'augmented'
       drawgraph()
     else
       augment()
   else
-    console.log 'failed'
     augment()
