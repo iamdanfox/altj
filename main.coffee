@@ -80,6 +80,13 @@ growN = (n) ->
 
   cont()
 
+setSpiky = () ->
+  console.log 'setSpiky'
+  AUGMENT_PROPORTION = 0.8
+
+setRound = () ->
+  console.log 'setRound'
+  AUGMENT_PROPORTION = 0.5
 
 shortcut = () ->
   # console.log 'shortcut'
