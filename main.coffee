@@ -3,9 +3,12 @@
 w = document.body.clientWidth
 h = document.body.clientHeight
 
-graph = new Graph([w/2+0,h/3+0],
-                  [w/2+40,h/3+10],
-                  [w/2+30,h/3+90])
+randX = () -> w/2 + Math.random()*100 - 50
+randY = () -> h/3 + Math.random()*100 - 50
+
+graph = new Graph([randX(),randY()],
+                  [randX(),randY()],
+                  [randX(),randY()])
 
 dist = new NormalDistribution(edgelen(graph.edges[0]),
                               edgelen(graph.edges[1]),
