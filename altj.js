@@ -253,7 +253,7 @@ setSpiky = function() {
 
 setRound = function() {
   console.log('setRound');
-  return AUGMENT_PROPORTION = 0.5;
+  return AUGMENT_PROPORTION = 0.6;
 };
 
 shortcut = function() {

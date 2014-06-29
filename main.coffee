@@ -86,7 +86,7 @@ setSpiky = () ->
 
 setRound = () ->
   console.log 'setRound'
-  AUGMENT_PROPORTION = 0.5
+  AUGMENT_PROPORTION = 0.6
 
 shortcut = () ->
   # console.log 'shortcut'
