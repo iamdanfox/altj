@@ -11,9 +11,9 @@ graph = new Graph([randX(),randY()],
                   [randX(),randY()])
 
 # returns a NormalDistribution
-dist = makeNormalDist(edgelen(graph.edges[0]),
-                      edgelen(graph.edges[1]),
-                      edgelen(graph.edges[2]))
+dist = NormalDistribution.make(edgelen(graph.edges[0]),
+                               edgelen(graph.edges[1]),
+                               edgelen(graph.edges[2]))
 
 
 paper = new Raphael(document.getElementById('raphael'),w,h);
