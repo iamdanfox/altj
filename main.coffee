@@ -21,6 +21,9 @@ paper2 = new Raphael(document.getElementById('dist-graph'),500,200)
 window.onload = () ->
   paper.ZPD({ zoom: true, pan: true, drag: false });
   drawgraph()
+  document.getElementsByTagName('body')[0].onkeypress=keypress
+  return
+
 
 drawgraph = () ->
   paper.clear()
@@ -90,6 +93,10 @@ setSpiky = () ->
 setRound = () ->
   console.log 'setRound'
   AUGMENT_PROPORTION = 0.6
+
+keypress = (e) ->
+  if e.charCode is 13 #ie Enter
+    grow()
 
 shortcut = () ->
   # console.log 'shortcut'
