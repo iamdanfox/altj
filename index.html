@@ -6,17 +6,23 @@
 
   <title>Alt-J</title>
   <style type="text/css">
-  html {height:100%;}
+  html {height:100%;font-family:Helvetica Neue, sans-serif;font-size:90%;}
   body {margin:0;height:100%;background:rgb(240,235,255);}
-  .sections {position:absolute;left:10px;top:0px;}
+  .sidebar {position:absolute;left:10px;top:0px;opacity:0.3;
+    -webkit-transition:all 300ms;}
+  .sidebar:hover {opacity:1;}
 
   .section {background: #555;margin:10px 0;padding:10px;color:white;}
+  .section#top {background:none;color:#555;}
 
   div#raphael {width:100%;height:100%;outline:1px solid red;}
   div#dist-graph {width:500px;height:200px;
     position:absolute;bottom:10px;left:10px;opacity:0.3;
     -webkit-transition:all 500ms;}
-  div#dist-graph:hover {opacity:1;background:rgba(200,200,200,0.5);}
+  div#dist-graph:hover {opacity:1;}
+
+  h1 {margin:0;font-size:130%;}
+  a {color:inherit;}
   </style>
 </head>
 
@@ -24,21 +30,27 @@
 
 <div id="raphael"></div>
 
-<div class="sections">
-<div class="section">
-<button onclick="grow()">Grow</button>
-<button onclick="growN(20)">Grow 20</button>
+<div class="sidebar">
+
+  <div class="section" id="top">
+    <h1><a href="http://github.com/iamdanfox/altj">Alt-J</a>
+    by <a href="http://twitter.com/iamdanfox">iamdanfox</a></h1>
+  </div>
+
+  <div class="section" title="Refresh for a new starting triangle">
+    <button onclick="grow()">Grow</button>
+    <button onclick="growN(20)">Grow 20</button>
+  </div>
+
+  <div class="section">
+    <input type="radio" name="spikyness" id="spiky" checked onclick="setSpiky()" />
+      <label for="spiky">Spiky</label>
+    <input type="radio" name="spikyness" id="round" onclick="setRound()" />
+      <label for="round">Round</label>
+  </div>
 </div>
 
-<div class="section">
-  <input type="radio" name="spikyness" id="spiky" checked onclick="setSpiky()" />
-    <label for="spiky">Spiky</label>
-  <input type="radio" name="spikyness" id="round" onclick="setRound()" />
-    <label for="round">Round</label>
-</div>
-</div>
-
-<div id="dist-graph"></div>
+<div id="dist-graph" title="Histogram of line lengths"></div>
 
 <script src="raphael-min.js"></script>
 <script src="raphael-zpd.js"></script>

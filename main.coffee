@@ -50,7 +50,7 @@ drawgraph = () ->
   offset = -3*bucketsize
   for key, val of histogram
     h = val*3
-    paper2.rect(offset+key*2.2,190-h,bucketsize*2,h).attr('fill':'black', stroke:'none')
+    paper2.rect(offset+key*2.2,190-h,bucketsize*2,h).attr('fill':'#555', stroke:'none')
 
   # overlay normal
   # paper2.path("M 150 10 S 180 10 190 100 210 190 300 190").attr('stroke','white')
@@ -64,7 +64,7 @@ drawgraph = () ->
 
 
 
-AUGMENT_PROPORTION = 0.75
+AUGMENT_PROPORTION = 0.8
 
 grow = () ->
   if Math.random() > AUGMENT_PROPORTION # good values: 0.8 or 0.7

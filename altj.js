@@ -221,14 +221,14 @@ drawgraph = function() {
     val = histogram[key];
     h = val * 3;
     _results.push(paper2.rect(offset + key * 2.2, 190 - h, bucketsize * 2, h).attr({
-      'fill': 'black',
+      'fill': '#555',
       stroke: 'none'
     }));
   }
   return _results;
 };
 
-AUGMENT_PROPORTION = 0.75;
+AUGMENT_PROPORTION = 0.8;
 
 grow = function() {
   var success;
