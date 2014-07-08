@@ -226,6 +226,7 @@ paper = new Raphael(document.getElementById('raphael'), w, h);
 paper2 = new Raphael(document.getElementById('dist-graph'), 500, 200);
 
 window.onload = function() {
+  document.getElementsByClassName('sidebar')[0].innerHTML += "<div class=\"section\">\n  <button title=\"or press Enter\" onclick=\"grow()\">Grow</button>\n  <button onclick=\"grow(20)\">Grow 20</button>\n  <button onclick=\"window.location=window.location\">Restart</button>\n</div>\n\n<div class=\"section\">\n  <input type=\"radio\" name=\"spikyness\" id=\"spiky\" checked onclick=\"setSpiky()\" />\n    <label for=\"spiky\">Spiky</label>\n  <input type=\"radio\" name=\"spikyness\" id=\"round\" onclick=\"setRound()\" />\n    <label for=\"round\">Round</label>\n</div>";
   paper.ZPD({
     zoom: true,
     pan: true,

@@ -20,6 +20,23 @@ paper = new Raphael(document.getElementById('raphael'),w,h);
 paper2 = new Raphael(document.getElementById('dist-graph'),500,200)
 
 window.onload = () ->
+
+  # only insert buttons when everything else has already been set up
+  document.getElementsByClassName('sidebar')[0].innerHTML += """
+  <div class="section">
+    <button title="or press Enter" onclick="grow()">Grow</button>
+    <button onclick="grow(20)">Grow 20</button>
+    <button onclick="window.location=window.location">Restart</button>
+  </div>
+
+  <div class="section">
+    <input type="radio" name="spikyness" id="spiky" checked onclick="setSpiky()" />
+      <label for="spiky">Spiky</label>
+    <input type="radio" name="spikyness" id="round" onclick="setRound()" />
+      <label for="round">Round</label>
+  </div>
+  """
+
   paper.ZPD({ zoom: true, pan: true, drag: false });
   drawgraph()
   document.getElementsByTagName('body')[0].onkeypress=keypress

@@ -23,6 +23,7 @@ class NormalDistribution
     return @stdev*x + @mean
 
 # Assumes equal mixing.
+# TODO: try using an uneven mixing 
 class TriModal
   # m1, v1, m2, v2, m3, v3
 
