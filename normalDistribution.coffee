@@ -23,12 +23,12 @@ class NormalDistribution
     return @stdev*x + @mean
 
 # Assumes equal mixing.
-# TODO: try using an uneven mixing 
+# TODO: try using an uneven mixing
 class TriModal
   # m1, v1, m2, v2, m3, v3
 
   @make: (len1, len2, len3) ->
-    variance = 10
+    variance = 5
     return new TriModal(len1,variance,len2,variance,len3,variance)
 
   constructor: (m1, v1, m2, v2, m3, v3) ->

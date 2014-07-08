@@ -11,10 +11,15 @@ graph = new Graph([randX(),randY()],
                   [randX(),randY()])
 
 # returns a NormalDistribution
-dist = NormalDistribution.make(edgelen(graph.edges[0]),
+normalDist = NormalDistribution.make(edgelen(graph.edges[0]),
                                edgelen(graph.edges[1]),
                                edgelen(graph.edges[2]))
 
+triModalDist = TriModal.make(edgelen(graph.edges[0]),
+                               edgelen(graph.edges[1]),
+                               edgelen(graph.edges[2]))
+
+dist = normalDist
 
 paper = new Raphael(document.getElementById('raphael'),w,h);
 paper2 = new Raphael(document.getElementById('dist-graph'),500,200)
@@ -25,7 +30,7 @@ window.onload = () ->
   document.getElementsByClassName('sidebar')[0].innerHTML += """
   <div class="section">
     <button title="or press Enter" onclick="grow()">Grow</button>
-    <button onclick="grow(20)">Grow 20</button>
+    <button onclick="growN(20)">Grow 20</button>
     <button onclick="window.location=window.location">Restart</button>
   </div>
 
@@ -34,6 +39,13 @@ window.onload = () ->
       <label for="spiky">Spiky</label>
     <input type="radio" name="spikyness" id="round" onclick="setRound()" />
       <label for="round">Round</label>
+  </div>
+
+  <div class="section">
+    <input type="radio" name="distribution" id="moreRandom" checked onclick="setMoreRandom()" />
+      <label for="moreRandom" title="Use a plain normal distribution based on the 3 initial sides">Random</label>
+    <input type="radio" name="distribution" id="moreRegular" onclick="setMoreRegular()" />
+      <label for="moreRegular" title="Use a trimodal mixture of normal distributions based on the 3 initial sides">Regular</label>
   </div>
   """
 
@@ -90,6 +102,12 @@ setSpiky = () ->
 setRound = () ->
   console.log 'setRound'
   AUGMENT_PROPORTION = 0.6
+
+setMoreRandom = () ->
+  dist = normalDist
+
+setMoreRegular = () ->
+  dist = triModalDist
 
 keypress = (e) ->
   if e.charCode is 13 #ie Enter
