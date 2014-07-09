@@ -81,12 +81,13 @@ Graph = (function() {
     this.edges.push([newpoint, origp2]);
     i = this.exteriors.indexOf(origp1);
     j = this.exteriors.indexOf(origp2);
-    if (!(i - j === 1 || j - i === 1)) {
-      console.error("exterior invariant broken");
-    }
     a = Math.min(i, j);
     b = Math.max(i, j);
-    this.exteriors = this.exteriors.slice(0, +a + 1 || 9e9).concat([newpoint], this.exteriors.slice(b));
+    if (a + 1 === b) {
+      this.exteriors = this.exteriors.slice(0, +a + 1 || 9e9).concat([newpoint], this.exteriors.slice(b));
+    } else {
+      this.exteriors.unshift(newpoint);
+    }
   };
 
   Graph.prototype.shortcut = function(p1, p2, p3) {

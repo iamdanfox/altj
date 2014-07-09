@@ -20,11 +20,13 @@ class Graph
     # update exterior points
     i = @exteriors.indexOf(origp1)
     j = @exteriors.indexOf(origp2)
-    console.error "exterior invariant broken" unless i-j is 1 or j-i is 1
     a = Math.min(i,j)
     b = Math.max(i,j)
 
-    @exteriors = @exteriors[0..a].concat [newpoint], @exteriors[b..]
+    if a+1 is b # need to insert a new point into the middle of exteriors
+      @exteriors = @exteriors[0..a].concat [newpoint], @exteriors[b..]
+    else # simply append one (exteriors list wraps round!)
+      @exteriors.unshift newpoint
 
     return
 
