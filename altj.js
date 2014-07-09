@@ -230,14 +230,7 @@ paper = new Raphael(document.getElementById('raphael'), w, h);
 paper2 = new Raphael(document.getElementById('dist-graph'), 500, 200);
 
 window.onload = function() {
-  document.getElementsByClassName('sidebar')[0].innerHTML += "<div class=\"section\">\n  <button title=\"or press Enter\" onclick=\"grow()\">Grow</button>\n  <button onclick=\"growN(20)\">Grow 20</button>\n  <button onclick=\"window.location=window.location\">Restart</button>\n</div>\n\n<div class=\"section\">\n  <input type=\"radio\" name=\"spikyness\" id=\"spiky\" checked onclick=\"setSpiky()\" />\n    <label for=\"spiky\">Spiky</label>\n  <input type=\"radio\" name=\"spikyness\" id=\"round\" onclick=\"setRound()\" />\n    <label for=\"round\">Round</label>\n</div>\n\n<div class=\"section\">\n  <input type=\"radio\" name=\"distribution\" id=\"moreRandom\" checked onclick=\"setMoreRandom()\" />\n    <label for=\"moreRandom\" title=\"Use a plain normal distribution based on the 3 initial sides\">Random</label>\n  <input type=\"radio\" name=\"distribution\" id=\"moreRegular\" onclick=\"setMoreRegular()\" />\n    <label for=\"moreRegular\" title=\"Use a trimodal mixture of normal distributions based on the 3 initial sides\">Regular</label>\n</div>";
-  paper.ZPD({
-    zoom: true,
-    pan: true,
-    drag: false
-  });
-  drawgraph();
-  document.getElementsByTagName('body')[0].onkeypress = keypress;
+  React.renderComponent(React.DOM.h1(null, 'Hello, world!'), document.getElementsByTagName('body')[0]);
 };
 
 drawgraph = function() {

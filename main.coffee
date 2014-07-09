@@ -26,32 +26,37 @@ paper2 = new Raphael(document.getElementById('dist-graph'),500,200)
 
 window.onload = () ->
 
+
+  React.renderComponent(
+    React.DOM.h1(null, 'Hello, world!'),
+    document.getElementsByTagName('body')[0]
+  )
   # only insert buttons when everything else has already been set up
-  document.getElementsByClassName('sidebar')[0].innerHTML += """
-  <div class="section">
-    <button title="or press Enter" onclick="grow()">Grow</button>
-    <button onclick="growN(20)">Grow 20</button>
-    <button onclick="window.location=window.location">Restart</button>
-  </div>
-
-  <div class="section">
-    <input type="radio" name="spikyness" id="spiky" checked onclick="setSpiky()" />
-      <label for="spiky">Spiky</label>
-    <input type="radio" name="spikyness" id="round" onclick="setRound()" />
-      <label for="round">Round</label>
-  </div>
-
-  <div class="section">
-    <input type="radio" name="distribution" id="moreRandom" checked onclick="setMoreRandom()" />
-      <label for="moreRandom" title="Use a plain normal distribution based on the 3 initial sides">Random</label>
-    <input type="radio" name="distribution" id="moreRegular" onclick="setMoreRegular()" />
-      <label for="moreRegular" title="Use a trimodal mixture of normal distributions based on the 3 initial sides">Regular</label>
-  </div>
-  """
-
-  paper.ZPD({ zoom: true, pan: true, drag: false });
-  drawgraph()
-  document.getElementsByTagName('body')[0].onkeypress=keypress
+  # document.getElementsByClassName('sidebar')[0].innerHTML += """
+  # <div class="section">
+  #   <button title="or press Enter" onclick="grow()">Grow</button>
+  #   <button onclick="growN(20)">Grow 20</button>
+  #   <button onclick="window.location=window.location">Restart</button>
+  # </div>
+  #
+  # <div class="section">
+  #   <input type="radio" name="spikyness" id="spiky" checked onclick="setSpiky()" />
+  #     <label for="spiky">Spiky</label>
+  #   <input type="radio" name="spikyness" id="round" onclick="setRound()" />
+  #     <label for="round">Round</label>
+  # </div>
+  #
+  # <div class="section">
+  #   <input type="radio" name="distribution" id="moreRandom" checked onclick="setMoreRandom()" />
+  #     <label for="moreRandom" title="Use a plain normal distribution based on the 3 initial sides">Random</label>
+  #   <input type="radio" name="distribution" id="moreRegular" onclick="setMoreRegular()" />
+  #     <label for="moreRegular" title="Use a trimodal mixture of normal distributions based on the 3 initial sides">Regular</label>
+  # </div>
+  # """
+  #
+  # paper.ZPD({ zoom: true, pan: true, drag: false });
+  # drawgraph()
+  # document.getElementsByTagName('body')[0].onkeypress=keypress
   return
 
 
