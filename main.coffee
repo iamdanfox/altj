@@ -46,43 +46,18 @@ TitleComp = React.createClass({
     )
 })
 
-AUGMENT_PROPORTION = 0.8 #shift to props
 
 GrowComp = React.createClass({
-  grow: () ->
-    console.log 'grow()'
-    console.debug @
-    if Math.random() > @props.augmentProportion # good values: 0.8 or 0.7
-      success = shortcut()
-      if not success
-        augment()
-    else
-      augment()
-
-  grow20: () ->
-    console.log 'grow20()'
-    growN = (n) ->
-      target = graph.points.length + n
-      cont = () ->
-        if graph.points.length < target then @grow()
-        setTimeout cont, 5
-      cont()
-
-    growN(20)
-
-  restart: () ->
-    alert('unimplemented')
-
   render: () ->
     (div {className:'section'}, [
-      (button {title:'or Press Enter',onClick:@grow}, "Grow"),
-      (button {onClick:@grow20}, "Grow 20"),
-      (button {onclick:@restart}, "Restart")
+      (button {title:'or Press Enter',onClick:@props.grow}, "Grow"),
+      (button {onClick:@props.grow20}, "Grow 20"),
+      (button {onClick:@props.restart}, "Restart")
     ])
 })
 
-SPIKY: 0.8
-ROUND: 0.6
+# SPIKY: 0.8
+# ROUND: 0.6
 
 SpikynessComp = React.createClass({
   # props are immutable
@@ -115,17 +90,43 @@ App = React.createClass({
   setRound: () ->
     @setState(augmentProportion: 0.6)
 
+  grow: () ->
+    console.log 'grow()'
+    console.debug @
+    if Math.random() > @props.augmentProportion # good values: 0.8 or 0.7
+      success = shortcut()
+      if not success
+        augment()
+    else
+      augment()
+
+  grow20: () ->
+    console.log 'grow20()'
+    growN = (n) ->
+      target = graph.points.length + n
+      cont = () ->
+        if graph.points.length < target then @grow()
+        setTimeout cont, 5
+      cont()
+
+    growN(20)
+
+  restart: () ->
+    alert('unimplemented')
+
   render: () ->
     return (div {}, [
       RaphaelComp(),
       SidebarComp({
         onSetSpiky:@setSpiky,
         onSetRound:@setRound,
+        grow: @grow,
+        grow20: @grow20,
+        restart: @restart,
         augmentProportion:@state.augmentProportion
       })
     ])
 })
-
 
 window.onload = () ->
 
