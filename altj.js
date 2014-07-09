@@ -492,19 +492,21 @@ newpoints = function(p1, p2, l1, l2) {
 };
 
 shortcut = function(graph) {
-  var bestshortcut, d, i, nointersections, p1, p2, p3, t1, t2, t3, _i, _ref1, _ref2, _ref3;
-  if (graph.edges.length < 6) {
+  var bestshortcut, d, i, nointersections, p1, p2, p3, t1, t2, t3, _i, _ref1, _ref2;
+  if (graph.edges.length < 5) {
     return false;
   }
   bestshortcut = Infinity;
-  for (i = _i = 0, _ref1 = graph.exteriors.length - 2; 0 <= _ref1 ? _i < _ref1 : _i > _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
-    _ref2 = graph.exteriors.slice(i, +(i + 2) + 1 || 9e9), t1 = _ref2[0], t2 = _ref2[1], t3 = _ref2[2];
+  for (i = _i = 0, _ref1 = graph.exteriors.length; 0 <= _ref1 ? _i < _ref1 : _i > _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
+    t1 = graph.exteriors[i];
+    t2 = graph.exteriors[(i + 1) % graph.exteriors.length];
+    t3 = graph.exteriors[(i + 2) % graph.exteriors.length];
     d = distbetween(t1, t3);
     nointersections = function() {
-      var a, b, _j, _len, _ref3, _ref4;
-      _ref3 = graph.edges;
-      for (_j = 0, _len = _ref3.length; _j < _len; _j++) {
-        _ref4 = _ref3[_j], a = _ref4[0], b = _ref4[1];
+      var a, b, _j, _len, _ref2, _ref3;
+      _ref2 = graph.edges;
+      for (_j = 0, _len = _ref2.length; _j < _len; _j++) {
+        _ref3 = _ref2[_j], a = _ref3[0], b = _ref3[1];
         if (intersects(a, b, t1, t3)) {
           return false;
         }
@@ -513,7 +515,7 @@ shortcut = function(graph) {
     };
     if (d < bestshortcut && !graph.hasEdge([t1, t3]) && nointersections()) {
       bestshortcut = d;
-      _ref3 = [t1, t2, t3], p1 = _ref3[0], p2 = _ref3[1], p3 = _ref3[2];
+      _ref2 = [t1, t2, t3], p1 = _ref2[0], p2 = _ref2[1], p3 = _ref2[2];
     }
   }
   if (bestshortcut < Infinity) {

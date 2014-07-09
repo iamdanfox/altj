@@ -58,16 +58,18 @@ newpoints = (p1,p2,l1,l2) ->
 
 shortcut = (graph) ->
   # console.log 'shortcut'
-  if graph.edges.length < 6 then return false
+  if graph.edges.length < 5 then return false
 
   # select two random points (with one inbetween) to shortcut
   # i = Math.floor(Math.random()*(graph.exteriors.length - 2))
   # [p1,p2,p3] = graph.exteriors[i..i+2]
 
-  # choose shortest possible shortcut
   bestshortcut = Infinity
-  for i in [0...graph.exteriors.length-2]
-    [t1,t2,t3] = graph.exteriors[i..i+2]
+  # evaluate each possible shortcut, choose shortest
+  for i in [0...graph.exteriors.length]
+    t1 = graph.exteriors[i]
+    t2 = graph.exteriors[(i+1) % graph.exteriors.length]
+    t3 = graph.exteriors[(i+2) % graph.exteriors.length]
     d = distbetween(t1,t3)
     # check new edge doesn't overlap with anything
     nointersections = () ->
