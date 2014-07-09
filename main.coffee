@@ -138,21 +138,30 @@ App = React.createClass({
 
   grow: () ->
     console.log 'grow()'
+    dist = if @state.distribution is 'NORMAL' then @state.normalDist else @state.triModalDist
+
     if Math.random() > @state.augmentProportion # good values: 0.8 or 0.7
-      success = shortcut()
+      success = shortcut(@state.graph)
       if not success
-        augment()
+        augment(@state.graph, dist)
     else
-      augment()
+      augment(@state.graph, dist)
+
+    # hacky way of notifying react # TODO
+    @setState(graph:@state.graph)
+    return
 
   grow20: () ->
     console.log 'grow20()'
-    singleGrow = @grow
-    target = graph.points.length + 20
-    cont = () ->
-      if graph.points.length < target then singleGrow()
+    target = @state.graph.points.length + 20
+    cont = () =>
+      if @state.graph.points.length < target then @grow()
       setTimeout cont, 5
     cont()
+    
+    # hacky way of notifying react # TODO
+    @setState(graph:@state.graph)
+    return
 
   restart: () ->
     alert('unimplemented')
@@ -194,15 +203,17 @@ window.onload = () ->
 
 
 
-drawgraph = () ->
-  paper.clear()
-
-  for [[x1,y1],[x2,y2]] in graph.getEdges()
-    # console.log "M #{x1} #{y1} l #{x2-x1} #{y2-y1}"
-    paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}").attr('stroke','black')
 
 
-shortcut = () ->
+
+
+
+
+
+
+
+
+shortcut = (graph) ->
   # console.log 'shortcut'
   if graph.edges.length < 6 then return false
 
@@ -227,14 +238,13 @@ shortcut = () ->
   # do the shortcut!
   if bestshortcut < Infinity
     graph.shortcut(p1,p2,p3)
-    drawgraph()
     console.log 'shortcut success!'
     return true
   else
     console.log 'convex'
     return false
 
-augment = () ->
+augment = (graph, dist) ->
   # sample two new lengths
   l1 = dist.sample()
   l2 = dist.sample()
@@ -268,12 +278,10 @@ augment = () ->
     if safeToAdd(n2)
       graph.extend(p1,p2,n2)
       console.log 'augmented'
-      drawgraph()
     else if safeToAdd(n1)
       graph.extend(p1,p2,n1)
       console.log 'augmented'
-      drawgraph()
     else
-      augment()
+      augment(graph, dist)
   else
-    augment()
+    augment(graph, dist)
