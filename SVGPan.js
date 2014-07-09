@@ -1,8 +1,10 @@
+/* Tweaked by @iamdanfox to work with facebook react */
+
 /**
  *  SVGPan library 1.2.2
  * ======================
  *
- * Given an unique existing element with id "viewport" (or when missing, the
+ * Given an unique existing element with className "viewport" (or when missing, the
  * first g-element), including the the library into any SVG adds the following
  * capabilities:
  *
@@ -114,7 +116,7 @@ function SVGPan(root) {
 	 */
 	function getRoot(root) {
 		if(svgRoot == null) {
-			var r = root.getElementById("viewport") ? root.getElementById("viewport") : root.documentElement, t = r;
+			var r = root.getElementsByClassName("viewport")[0] ? root.getElementsByClassName("viewport")[0] : root.documentElement, t = r;
 
 			while(t != root) {
 				if(t.getAttribute("viewBox")) {

@@ -97,7 +97,7 @@ SVGComp = React.createClass({
       (path {stroke:'black', fill:'none', d:"M #{x1} #{y1} l #{x2-x1} #{y2-y1}"})
 
     return (svg {height:'100%', width:'100%', ref:'svg'},
-      (React.DOM.g {id:'viewport'}, paths)
+      (React.DOM.g {className:'viewport'}, paths)
     )
 });
 

@@ -283,7 +283,7 @@ SVGComp = React.createClass({
       width: '100%',
       ref: 'svg'
     }, React.DOM.g({
-      id: 'viewport'
+      className: 'viewport'
     }, paths));
   }
 });
