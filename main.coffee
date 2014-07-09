@@ -21,11 +21,10 @@ triModalDist = TriModal.make(edgelen(graph.edges[0]),
 
 dist = normalDist
 paper = null
-# paper2 = new Raphael(document.getElementById('dist-graph'),500,200)
 
-{h1,a,div,button,input,label} = React.DOM # destructuring assignment
+{h1,div,button,input,label} = React.DOM # destructuring assignment
 
-RaphaelComp = React.createClass({
+RaphaelComp = React.createClass({ # TODO make this react to graph changes
   paper: null
 
   componentDidMount: () ->
@@ -38,16 +37,48 @@ RaphaelComp = React.createClass({
     # make ZPD
     @paper.ZPD({ zoom: true, pan: true, drag: false });
 
+    @drawTriangles()
+
+  drawTriangles: () ->
+    for [[x1,y1],[x2,y2]] in graph.getEdges()
+      @paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}").attr('stroke','black')
+
   componentWillUnMount: () ->
     @paper.remove()
 
   render: () ->
-    # TODO: draw all the little triangles
-    # for [[x1,y1],[x2,y2]] in graph.getEdges()
-    #   # console.log "M #{x1} #{y1} l #{x2-x1} #{y2-y1}"
-    #   paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}").attr('stroke','black')
     (div {id:'raphael', ref:'raphael'})
 });
+
+HistogramComp = React.createClass({
+  paper2: null
+
+  componentDidMount: () ->
+    # initialise raphael
+    elem = @refs.histogram.getDOMNode()
+    @paper2 = new Raphael(elem,500,200);
+    paper2 = @paper2               # TODO delete this hack
+    @drawBars()
+
+  drawBars: () ->
+    bucketsize = 5
+    offset = -3*bucketsize
+    histogram = {}
+    for edge in graph.edges
+      l = Math.floor(edgelen edge)
+      b = l - (l % bucketsize)
+      histogram[b] = if histogram[b]?  then histogram[b] + 1 else histogram[b] = 1
+
+    for key, val of histogram
+      h = val*3
+      @paper2.rect(offset+key*2.2,190-h,bucketsize*2,h).attr('fill':'#555', stroke:'none')
+
+  componentWillUnMount: () ->
+    @paper2.remove()
+
+  render: () ->
+    (div {id:'dist-graph', title:'Histogram of line lengths', ref:'histogram'})
+})
 
 TitleComp = React.createClass({
   render: () ->
@@ -99,8 +130,7 @@ SidebarComp = React.createClass({
       TitleComp(),
       GrowComp(@props),
       SpikynessComp(@props), # TODO: limit what goes down?
-      DistributionComp(@props),
-      # HistogramComp()
+      DistributionComp(@props)
     ])
 })
 
@@ -127,24 +157,19 @@ App = React.createClass({
   grow20: () ->
     console.log 'grow20()'
     singleGrow = @grow
-    growN = (n) ->
-      target = graph.points.length + n
-      cont = () ->
-        if graph.points.length < target then singleGrow()
-        setTimeout cont, 5
-      cont()
-
-    growN(20)
+    target = graph.points.length + 20
+    cont = () ->
+      if graph.points.length < target then singleGrow()
+      setTimeout cont, 5
+    cont()
 
   restart: () ->
     alert('unimplemented')
 
   setNormal: () ->
-    console.log 'setNormal()'
     @setState(distribution: 'NORMAL')
 
   setTriModal: () ->
-    console.log 'setTriModal()'
     @setState(distribution: 'TRI_MODAL')
 
   render: () ->
@@ -160,7 +185,8 @@ App = React.createClass({
         distribution:     @state.distribution
         setNormal: @setNormal
         setTriModal: @setTriModal
-      })
+      }),
+      HistogramComp( ) # TODO pass in graph
     ])
 })
 
@@ -181,18 +207,6 @@ drawgraph = () ->
     # console.log "M #{x1} #{y1} l #{x2-x1} #{y2-y1}"
     paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}").attr('stroke','black')
 
-  # do histogram thing
-  # bucketsize = 5
-  # offset = -3*bucketsize
-  # histogram = {}
-  # for edge in graph.edges
-  #   l = Math.floor(edgelen edge)
-  #   b = l - (l % bucketsize)
-  #   histogram[b] = if histogram[b]?  then histogram[b] + 1 else histogram[b] = 1
-  #
-  # for key, val of histogram
-  #   h = val*3
-  #   paper2.rect(offset+key*2.2,190-h,bucketsize*2,h).attr('fill':'#555', stroke:'none')
 
 # keypress = (e) ->
 #   if e.charCode is 13 #ie Enter
