@@ -289,8 +289,8 @@ SVGComp = React.createClass({
 });
 
 HistogramComp = React.createClass({
-  drawBars: function() {
-    var b, bucketsize, edge, h, histogram, l, maxY, x, y, yScale, _i, _len, _ref1;
+  render: function() {
+    var b, bars, bucketsize, edge, histogram, l, maxY, x, y, yScale, _i, _len, _ref1;
     bucketsize = 5;
     histogram = {};
     _ref1 = this.props.graph.edges;
@@ -309,32 +309,26 @@ HistogramComp = React.createClass({
     while (maxY * yScale > this.props.height) {
       yScale = yScale / 2;
     }
-    return (function() {
+    bars = (function() {
       var _results;
       _results = [];
       for (x in histogram) {
         y = histogram[x];
-        h = y * yScale;
         _results.push(rect({
           x: x * 2.2,
-          y: this.props.height - h,
+          y: this.props.height - y * yScale,
           width: bucketsize * 2,
-          height: h,
+          height: y * yScale,
           fill: '#555',
           stroke: 'none'
         }));
       }
       return _results;
     }).call(this);
-  },
-  render: function() {
     return div({
       id: 'dist-graph',
-      title: 'Histogram of line lengths',
-      ref: 'histogram',
-      height: this.props.height,
-      width: this.props.width
-    }, svg({}, this.drawBars()));
+      title: 'Histogram of line lengths'
+    }, svg({}, bars));
   }
 });
 

@@ -104,15 +104,7 @@ SVGComp = React.createClass({
 
 
 HistogramComp = React.createClass({
-  # paper2: null
-
-  # componentDidMount: () ->
-  #   @paper2 = new Raphael(@refs.histogram.getDOMNode(),
-  #     @props.width,
-  #     @props.height)
-  #   @drawBars()
-
-  drawBars: () ->
+  render: () ->
     bucketsize = 5
     histogram = {}
     for edge in @props.graph.edges
@@ -124,28 +116,22 @@ HistogramComp = React.createClass({
     maxY = 0
     for x, y of histogram
       maxY = Math.max maxY, y
-
     yScale = 3
     while maxY*yScale > @props.height
       yScale = yScale / 2
 
-    return (for x, y of histogram
-      h = y*yScale # bar height
-      # @paper2.rect(x*2.2,@props.height-h,bucketsize*2,h).attr('fill':'#555', stroke:'none')
-      (rect {x:x*2.2, y:@props.height-h,  width:bucketsize*2, height: h, fill:'#555', stroke:'none'})
-    )
+    bars = for x, y of histogram
+      rect {
+        x:      x*2.2
+        y:      @props.height-y*yScale
+        width:  bucketsize*2
+        height: y*yScale
+        fill:   '#555'
+        stroke: 'none'
+      }
 
-  # componentWillUnMount: () -> @paper2.remove()
-
-  render: () ->
-    # if @isMounted()
-    #   @paper2.clear()
-    #   @drawBars() # TODO only render diff
-      # <rect x="154" y="152" width="10" height="48" r="0" rx="0" ry="0" fill="#555555" stroke="none" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></rect>
-
-
-    (div {id:'dist-graph', title:'Histogram of line lengths', ref:'histogram', height:@props.height, width:@props.width},
-    (svg {}, @drawBars())
+    return (div {id:'dist-graph', title:'Histogram of line lengths'},
+      (svg {}, bars)
     )
 })
 
