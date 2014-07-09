@@ -529,11 +529,11 @@ shortcut = function(graph) {
 
 augment = function(graph, dist) {
   var i, l1, l2, n1, n2, nps, p1, p2, safeToAdd;
-  l1 = dist.sample();
-  l2 = dist.sample();
-  i = Math.floor(Math.random() * (graph.exteriors.length - 1));
+  l1 = Math.abs(dist.sample());
+  l2 = Math.abs(dist.sample());
+  i = Math.floor(Math.random() * graph.exteriors.length);
   p1 = graph.exteriors[i];
-  p2 = graph.exteriors[i + 1];
+  p2 = graph.exteriors[(i + 1) % graph.exteriors.length];
   safeToAdd = function(testpoint) {
     var a, b, c, p, _i, _j, _k, _len, _len1, _len2, _ref1, _ref2, _ref3, _ref4;
     _ref1 = graph.points;

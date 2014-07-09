@@ -91,13 +91,13 @@ shortcut = (graph) ->
 
 augment = (graph, dist) ->
   # sample two new lengths
-  l1 = dist.sample()
-  l2 = dist.sample()
+  l1 = Math.abs(dist.sample())
+  l2 = Math.abs(dist.sample())
 
   # randomly select two exterior points to augment
-  i = Math.floor(Math.random()*(graph.exteriors.length - 1))
+  i = Math.floor(Math.random()*(graph.exteriors.length))
   p1 = graph.exteriors[i]
-  p2 = graph.exteriors[i+1]
+  p2 = graph.exteriors[(i+1) % graph.exteriors.length]
 
   safeToAdd = (testpoint) ->
     # check point isn't already in graph
