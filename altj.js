@@ -3,17 +3,19 @@ var App, DistributionComp, Graph, GrowComp, HistogramComp, NormalDistribution, R
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 Graph = (function() {
+  function Graph() {}
+
   Graph.prototype.points = [];
 
   Graph.prototype.exteriors = [];
 
   Graph.prototype.edges = [];
 
-  function Graph(p1, p2, p3) {
+  Graph.prototype.intialise3points = function(p1, p2, p3) {
     this.points = [p1, p2, p3];
     this.exteriors = [p1, p2, p3];
-    this.edges = [[p1, p2], [p2, p3], [p3, p1]];
-  }
+    return this.edges = [[p1, p2], [p2, p3], [p3, p1]];
+  };
 
   Graph.prototype.extend = function(origp1, origp2, newpoint) {
     var a, b, i, j;
@@ -78,6 +80,15 @@ Graph = (function() {
         return u;
       }
     });
+  };
+
+  Graph.prototype.clone = function() {
+    var g;
+    g = new Graph();
+    g.points = this.points;
+    g.exteriors = this.exteriors;
+    g.edges = this.edges;
+    return g;
   };
 
   return Graph;
@@ -237,6 +248,10 @@ RaphaelComp = React.createClass({
     return this.paper.remove();
   },
   render: function() {
+    if (this.isMounted()) {
+      this.paper.clear();
+      this.drawTriangles();
+    }
     return div({
       id: 'raphael',
       ref: 'raphael'
@@ -280,6 +295,10 @@ HistogramComp = React.createClass({
     return this.paper2.remove();
   },
   render: function() {
+    if (this.isMounted()) {
+      this.paper2.clear();
+      this.drawBars();
+    }
     return div({
       id: 'dist-graph',
       title: 'Histogram of line lengths',
@@ -387,8 +406,10 @@ App = React.createClass({
     randY = function() {
       return document.body.clientHeight / 3 + Math.random() * 100 - 50;
     };
+    g = new Graph();
+    g.intialise3points([randX(), randY()], [randX(), randY()], [randX(), randY()]);
     return {
-      graph: g = new Graph([randX(), randY()], [randX(), randY()], [randX(), randY()]),
+      graph: g,
       normalDist: NormalDistribution.make(edgelen(g.edges[0]), edgelen(g.edges[1]), edgelen(g.edges[2])),
       triModalDist: TriModal.make(edgelen(g.edges[0]), edgelen(g.edges[1]), edgelen(g.edges[2])),
       augmentProportion: 0.8,
@@ -429,8 +450,8 @@ App = React.createClass({
       return function() {
         if (_this.state.graph.points.length < target) {
           _this.grow();
+          return setTimeout(cont, 5);
         }
-        return setTimeout(cont, 5);
       };
     })(this);
     cont();
@@ -439,7 +460,13 @@ App = React.createClass({
     });
   },
   restart: function() {
-    return alert('unimplemented');
+    var graph, normalDist, triModalDist, _ref1;
+    _ref1 = this.getInitialState(), graph = _ref1.graph, normalDist = _ref1.normalDist, triModalDist = _ref1.triModalDist;
+    return this.setState({
+      graph: graph,
+      normalDist: normalDist,
+      triModalDist: triModalDist
+    });
   },
   setNormal: function() {
     return this.setState({

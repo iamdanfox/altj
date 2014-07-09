@@ -24,7 +24,10 @@ RaphaelComp = React.createClass({ # TODO make this react to graph changes
     @paper.remove()
 
   render: () ->
-    (div {id:'raphael', ref:'raphael'})
+    if @isMounted()
+      @paper.clear()
+      @drawTriangles() # TODO only render diff
+    return (div {id:'raphael', ref:'raphael'})
 });
 
 HistogramComp = React.createClass({
@@ -54,6 +57,9 @@ HistogramComp = React.createClass({
     @paper2.remove()
 
   render: () ->
+    if @isMounted()
+      @paper2.clear()
+      @drawBars() # TODO only render diff
     (div {id:'dist-graph', title:'Histogram of line lengths', ref:'histogram'})
 })
 
@@ -116,10 +122,11 @@ App = React.createClass({
     randX = () -> document.body.clientWidth/2 + Math.random()*100 - 50
     randY = () -> document.body.clientHeight/3 + Math.random()*100 - 50
 
+    g = new Graph()
+    g.intialise3points([randX(),randY()], [randX(),randY()], [randX(),randY()])
+
     return {
-      graph: g = new Graph([randX(),randY()],
-                        [randX(),randY()],
-                        [randX(),randY()])
+      graph: g
       normalDist: NormalDistribution.make(edgelen(g.edges[0]),
                                          edgelen(g.edges[1]),
                                          edgelen(g.edges[2]))
@@ -147,7 +154,7 @@ App = React.createClass({
     else
       augment(@state.graph, dist)
 
-    # hacky way of notifying react # TODO
+    # hacky way of notifying react
     @setState(graph:@state.graph)
     return
 
@@ -155,16 +162,18 @@ App = React.createClass({
     console.log 'grow20()'
     target = @state.graph.points.length + 20
     cont = () =>
-      if @state.graph.points.length < target then @grow()
-      setTimeout cont, 5
+      if @state.graph.points.length < target
+        @grow()
+        setTimeout cont, 5
     cont()
-    
-    # hacky way of notifying react # TODO
+
+    # hacky way of notifying react
     @setState(graph:@state.graph)
     return
 
   restart: () ->
-    alert('unimplemented')
+    {graph,normalDist,triModalDist}= @getInitialState()
+    @setState(graph:graph,normalDist:normalDist,triModalDist:triModalDist)
 
   setNormal: () ->
     @setState(distribution: 'NORMAL')
