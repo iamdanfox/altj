@@ -21,16 +21,46 @@ triModalDist = TriModal.make(edgelen(graph.edges[0]),
 
 dist = normalDist
 
-paper = new Raphael(document.getElementById('raphael'),w,h);
-paper2 = new Raphael(document.getElementById('dist-graph'),500,200)
+# paper2 = new Raphael(document.getElementById('dist-graph'),500,200)
+
+{h1,a,div} = React.DOM # destructuring assignment
+
+RaphaelComponent = React.createClass({
+  render: () ->
+    d = (div {id:'raphael'})
+    # TODO initialise as Raphael
+    # paper = new Raphael(document.getElementById('raphael'),w,h);
+    # TODO: make ZPD
+    # paper.ZPD({ zoom: true, pan: true, drag: false });
+    return d
+});
+
+TitleComp = React.createClass({
+  render: () ->
+    (div {className:'section',id:'top'},
+      (h1 {}, [
+        (a {href:"http://github.com/iamdanfox/altj"}, "Alt-J"), " by ", (a {href:"http://twitter.com/iamdanfox"}, "iamdanfox")
+      ])
+    )
+})
+
+
+SidebarComp = React.createClass({
+  render: () ->
+    return (div {className:'sidebar'}, [
+      TitleComp(),
+      # GrowComp(),
+      # SpikynessComp(),
+      # DistributionComp()
+    ])
+})
+
 
 window.onload = () ->
 
+  console.debug RaphaelComponent
+  React.renderComponent( SidebarComp(), document.getElementsByTagName('body')[0])
 
-  React.renderComponent(
-    React.DOM.h1(null, 'Hello, world!'),
-    document.getElementsByTagName('body')[0]
-  )
   # only insert buttons when everything else has already been set up
   # document.getElementsByClassName('sidebar')[0].innerHTML += """
   # <div class="section">
