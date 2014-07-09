@@ -1,0 +1,13 @@
+{
+  "name": "raphael-zpd",
+  "homepage": "https://github.com/andrewseddon/raphael-zpd",
+  "_release": "c323b7730f",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "c323b7730fa3cfdf84c08e07ccec32cf74bd2499"
+  },
+  "_source": "git://github.com/andrewseddon/raphael-zpd.git",
+  "_target": "*",
+  "_originalSource": "git://github.com/andrewseddon/raphael-zpd.git"
+}
