@@ -1,5 +1,4 @@
 <!doctype html>
-
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -25,25 +24,16 @@
   h1 {margin:0;font-size:130%;}
   a {color:inherit;}
   </style>
+
+  <script src="bower_components/react/react.min.js"></script>
+  <script src="bower_components/raphael/raphael-min.js"></script>
+  <script src="bower_components/raphael-zpd/raphael-zpd.js"></script>
+  <script src="altj.js"></script>
 </head>
 
 <body>
-
-<div id="raphael"></div>
-
-<div class="sidebar">
-
-  <div class="section" id="top">
-    <h1><a href="http://github.com/iamdanfox/altj">Alt-J</a>
-    by <a href="http://twitter.com/iamdanfox">iamdanfox</a></h1>
-  </div>
-
-</div>
-
-<div id="dist-graph" title="Histogram of line lengths"></div>
-
-<script src="bower_components/raphael/raphael-min.js"></script>
-<script src="bower_components/raphael-zpd/raphael-zpd.js"></script>
-<script src="altj.js"></script>
+<script type="text/javascript">
+  React.renderComponent( App(), document.getElementsByTagName('body')[0])
+</script>
 </body>
 </html>

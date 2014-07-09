@@ -3,7 +3,7 @@ class Graph
   exteriors: [] # invariant: adjacent points have an edge between them
   edges         : [] # only stores one direction, but edges are bi-directional
 
-  constructor: (p1,p2,p3) ->
+  intialise3points: (p1,p2,p3) ->
     @points = [p1,p2,p3]
     @exteriors = [p1,p2,p3]
     @edges = [[p1,p2], [p2,p3], [p3,p1]]
@@ -54,3 +54,10 @@ class Graph
   adjacentpoints: (p) ->
     @edges.filter(([u,v]) -> u is p or v is p).
       map(([u,v]) -> if u is p then v else u)
+
+  clone: () ->
+    g = new Graph()
+    g.points = @points
+    g.exteriors = @exteriors
+    g.edges = @edges
+    return g
