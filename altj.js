@@ -535,39 +535,43 @@ augment = function(graph, dist) {
   i = Math.floor(Math.random() * (graph.exteriors.length - 1));
   p1 = graph.exteriors[i];
   p2 = graph.exteriors[i + 1];
+  safeToAdd = function(testpoint) {
+    var a, b, c, p, _i, _j, _k, _len, _len1, _len2, _ref1, _ref2, _ref3, _ref4;
+    _ref1 = graph.points;
+    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+      p = _ref1[_i];
+      if (distbetween(p, testpoint) < 20) {
+        return false;
+      }
+    }
+    _ref2 = graph.adjacentpoints(p1);
+    for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+      c = _ref2[_j];
+      if (!((__indexOf.call(graph.adjacentpoints(p2), c) >= 0))) {
+        continue;
+      }
+      if (intriangle(p1, p2, c, testpoint)) {
+        return false;
+      }
+      if (intriangle(p1, p2, testpoint, c)) {
+        return false;
+      }
+    }
+    _ref3 = graph.edges;
+    for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
+      _ref4 = _ref3[_k], a = _ref4[0], b = _ref4[1];
+      if (intersects(a, b, testpoint, p1)) {
+        return false;
+      }
+      if (intersects(a, b, testpoint, p2)) {
+        return false;
+      }
+    }
+    return true;
+  };
   nps = newpoints(p1, p2, l1, l2);
   if (nps.length > 0) {
     n1 = nps[0], n2 = nps[1];
-    safeToAdd = function(testpoint) {
-      var a, b, c, p, _i, _j, _k, _len, _len1, _len2, _ref1, _ref2, _ref3, _ref4;
-      _ref1 = graph.points;
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        p = _ref1[_i];
-        if (distbetween(p, testpoint) < 20) {
-          return false;
-        }
-      }
-      _ref2 = graph.adjacentpoints(p1);
-      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-        c = _ref2[_j];
-        if ((__indexOf.call(graph.adjacentpoints(p2), c) >= 0)) {
-          if (intriangle(p1, p2, c, testpoint)) {
-            return false;
-          }
-        }
-      }
-      _ref3 = graph.edges;
-      for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
-        _ref4 = _ref3[_k], a = _ref4[0], b = _ref4[1];
-        if (intersects(a, b, testpoint, p1)) {
-          return false;
-        }
-        if (intersects(a, b, testpoint, p2)) {
-          return false;
-        }
-      }
-      return true;
-    };
     if (safeToAdd(n2)) {
       graph.extend(p1, p2, n2);
       return console.log('augmented');

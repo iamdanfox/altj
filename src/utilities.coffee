@@ -16,6 +16,7 @@ distbetween = (p1,p2) -> edgelen [p1,p2]
 
 eq = ([a1,a2],[b1,b2]) -> a1 is b1 and a2 is b2
 
+# returns true if the last argument, testp, falls inside the triangle <p1,p2,p3>
 intriangle = (p1,p2,p3,testp) ->
   leftmost = Math.min p1[0],p2[0],p3[0]
   rightmost = Math.max p1[0],p2[0],p3[0]
@@ -99,26 +100,27 @@ augment = (graph, dist) ->
   p1 = graph.exteriors[i]
   p2 = graph.exteriors[i+1]
 
+  safeToAdd = (testpoint) ->
+    # check point isn't already in graph
+    for p in graph.points
+      if distbetween(p, testpoint) < 20
+        return false
+
+    # check new point doesn't form a 4-sided shape
+    for c in graph.adjacentpoints(p1) when (c in graph.adjacentpoints(p2))
+      if intriangle(p1,p2,c,testpoint) then return false # is testpoint inside a triangle
+      if intriangle(p1,p2,testpoint,c) then return false # is any other point inside the new triangle
+
+    # check both new edges don't overlap with anything
+    for [a,b] in graph.edges
+      if intersects(a,b,testpoint,p1) then return false
+      if intersects(a,b,testpoint,p2) then return false
+
+    return true
+
   nps = newpoints(p1,p2,l1,l2) # can return an empty list if impossible
   if nps.length > 0
     [n1, n2] = nps
-
-    safeToAdd = (testpoint) ->
-      # check point isn't already in graph
-      for p in graph.points
-        if distbetween(p, testpoint) < 20
-          return false
-
-      # check new point doesn't form 4-sided shape
-      for c in graph.adjacentpoints(p1) when (c in graph.adjacentpoints(p2))
-        if intriangle(p1,p2,c,testpoint) then return false
-
-      # check both new edges don't overlap with anything
-      for [a,b] in graph.edges
-        if intersects(a,b,testpoint,p1) then return false
-        if intersects(a,b,testpoint,p2) then return false
-
-      return true
 
     if safeToAdd(n2)
       graph.extend(p1,p2,n2)
