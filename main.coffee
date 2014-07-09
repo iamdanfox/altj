@@ -20,32 +20,45 @@ triModalDist = TriModal.make(edgelen(graph.edges[0]),
                                edgelen(graph.edges[2]))
 
 dist = normalDist
-
+paper = null
 # paper2 = new Raphael(document.getElementById('dist-graph'),500,200)
 
 {h1,a,div,button,input,label} = React.DOM # destructuring assignment
 
 RaphaelComp = React.createClass({
-  #maybe use componentWillMount? or componentDidMount
-  # use refs
+  paper: null
+
+  componentDidMount: () ->
+    # initialise raphael
+    elem = @refs.raphael.getDOMNode()
+    w = document.body.clientWidth
+    h = document.body.clientHeight
+    @paper = new Raphael(elem,w,h);
+    paper = @paper               # TODO delete
+    # make ZPD
+    @paper.ZPD({ zoom: true, pan: true, drag: false });
+
+  componentWillUnMount: () ->
+    @paper.remove()
+
   render: () ->
-    d = (div {id:'raphael'})
-    # TODO initialise as Raphael
-    # paper = new Raphael(document.getElementById('raphael'),w,h);
-    # TODO: make ZPD
-    # paper.ZPD({ zoom: true, pan: true, drag: false });
-    return d
+    # TODO: draw all the little triangles
+    # for [[x1,y1],[x2,y2]] in graph.getEdges()
+    #   # console.log "M #{x1} #{y1} l #{x2-x1} #{y2-y1}"
+    #   paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}").attr('stroke','black')
+    (div {id:'raphael', ref:'raphael'})
 });
 
 TitleComp = React.createClass({
   render: () ->
     (div {className:'section',id:'top'},
       (h1 {}, [
-        (a {href:"http://github.com/iamdanfox/altj"}, "Alt-J"), " by ", (a {href:"http://twitter.com/iamdanfox"}, "iamdanfox")
+        (React.DOM.a {href:"http://github.com/iamdanfox/altj"}, "Alt-J"),
+        " by ",
+        (React.DOM.a {href:"http://twitter.com/iamdanfox"}, "iamdanfox")
       ])
     )
 })
-
 
 GrowComp = React.createClass({
   render: () ->
@@ -70,19 +83,31 @@ SpikynessComp = React.createClass({
     ])
 })
 
+DistributionComp = React.createClass({
+  render: () ->
+    (div {className:'section'}, [
+      (input {onClick:@props.setNormal, name:'distribution', type:'radio', checked:@props.distribution is 'NORMAL'}),
+      (label {onClick:@props.setNormal, title:'Use a plain normal distribution based on the 3 initial sides'}, "Random"),
+      (input {onClick:@props.setTriModal, name:'distribution', type:'radio', checked:@props.distribution is 'TRI_MODAL'}),
+      (label {onClick:@props.setTriModal, title:'Use a trimodal mixture of normal distributions based on the 3 initial sides'}, "Regular"),
+    ])
+})
+
 SidebarComp = React.createClass({
   render: () ->
     return (div {className:'sidebar'}, [
       TitleComp(),
       GrowComp(@props),
       SpikynessComp(@props), # TODO: limit what goes down?
-      # DistributionComp()
+      DistributionComp(@props),
+      # HistogramComp()
     ])
 })
 
 App = React.createClass({
   getInitialState: () -> # state is mutable up here
-    {augmentProportion: 0.8, distribution: 'NORMAL'}
+    augmentProportion: 0.8
+    distribution: 'NORMAL'
 
   setSpiky: () ->
     @setState(augmentProportion: 0.8)
@@ -92,8 +117,7 @@ App = React.createClass({
 
   grow: () ->
     console.log 'grow()'
-    console.debug @
-    if Math.random() > @props.augmentProportion # good values: 0.8 or 0.7
+    if Math.random() > @state.augmentProportion # good values: 0.8 or 0.7
       success = shortcut()
       if not success
         augment()
@@ -102,10 +126,11 @@ App = React.createClass({
 
   grow20: () ->
     console.log 'grow20()'
+    singleGrow = @grow
     growN = (n) ->
       target = graph.points.length + n
       cont = () ->
-        if graph.points.length < target then @grow()
+        if graph.points.length < target then singleGrow()
         setTimeout cont, 5
       cont()
 
@@ -114,9 +139,17 @@ App = React.createClass({
   restart: () ->
     alert('unimplemented')
 
+  setNormal: () ->
+    console.log 'setNormal()'
+    @setState(distribution: 'NORMAL')
+
+  setTriModal: () ->
+    console.log 'setTriModal()'
+    @setState(distribution: 'TRI_MODAL')
+
   render: () ->
     return (div {}, [
-      RaphaelComp(),
+      RaphaelComp(  ), # TODO pass in graph
       SidebarComp({
         onSetSpiky:@setSpiky,
         onSetRound:@setRound,
@@ -124,6 +157,9 @@ App = React.createClass({
         grow20: @grow20,
         restart: @restart,
         augmentProportion:@state.augmentProportion
+        distribution:     @state.distribution
+        setNormal: @setNormal
+        setTriModal: @setTriModal
       })
     ])
 })
@@ -133,16 +169,6 @@ window.onload = () ->
   React.renderComponent( App(), document.getElementsByTagName('body')[0])
 
 
-  #
-  # <div class="section">
-  #   <input type="radio" name="distribution" id="moreRandom" checked onclick="setMoreRandom()" />
-  #     <label for="moreRandom" title="Use a plain normal distribution based on the 3 initial sides">Random</label>
-  #   <input type="radio" name="distribution" id="moreRegular" onclick="setMoreRegular()" />
-  #     <label for="moreRegular" title="Use a trimodal mixture of normal distributions based on the 3 initial sides">Regular</label>
-  # </div>
-  # """
-  #
-  # paper.ZPD({ zoom: true, pan: true, drag: false });
   # drawgraph()
   # document.getElementsByTagName('body')[0].onkeypress=keypress
   return
@@ -156,28 +182,21 @@ drawgraph = () ->
     paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}").attr('stroke','black')
 
   # do histogram thing
-  bucketsize = 5
-  offset = -3*bucketsize
-  histogram = {}
-  for edge in graph.edges
-    l = Math.floor(edgelen edge)
-    b = l - (l % bucketsize)
-    histogram[b] = if histogram[b]?  then histogram[b] + 1 else histogram[b] = 1
+  # bucketsize = 5
+  # offset = -3*bucketsize
+  # histogram = {}
+  # for edge in graph.edges
+  #   l = Math.floor(edgelen edge)
+  #   b = l - (l % bucketsize)
+  #   histogram[b] = if histogram[b]?  then histogram[b] + 1 else histogram[b] = 1
+  #
+  # for key, val of histogram
+  #   h = val*3
+  #   paper2.rect(offset+key*2.2,190-h,bucketsize*2,h).attr('fill':'#555', stroke:'none')
 
-  for key, val of histogram
-    h = val*3
-    paper2.rect(offset+key*2.2,190-h,bucketsize*2,h).attr('fill':'#555', stroke:'none')
-
-
-setMoreRandom = () ->
-  dist = normalDist
-
-setMoreRegular = () ->
-  dist = triModalDist
-
-keypress = (e) ->
-  if e.charCode is 13 #ie Enter
-    grow()
+# keypress = (e) ->
+#   if e.charCode is 13 #ie Enter
+#     grow()
 
 shortcut = () ->
   # console.log 'shortcut'
