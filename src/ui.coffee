@@ -1,5 +1,5 @@
 
-{h1,div,button,input,label} = React.DOM # destructuring assignment
+{h1,div,button,input,label,svg,path} = React.DOM # destructuring assignment
 
 App = React.createClass({
   getInitialState: () ->
@@ -63,7 +63,7 @@ App = React.createClass({
 
   render: () ->
     (div {}, [
-      RaphaelComp( graph: @state.graph ),
+      SVGComp( graph: @state.graph ),
       SidebarComp({
         onSetSpiky:@setSpiky,
         onSetRound:@setRound,
@@ -81,26 +81,11 @@ App = React.createClass({
 
 
 
-RaphaelComp = React.createClass({
-  paper: null
-
-  componentDidMount: () ->
-    elem = @refs.raphael.getDOMNode()
-    @paper = new Raphael(elem, document.body.clientWidth, document.body.clientHeight)
-    @paper.ZPD({ zoom: true, pan: true, drag: false }) # zpd = zoom, pan, drag
-    @drawTriangles()
-
-  drawTriangles: () ->
-    for [[x1,y1],[x2,y2]] in @props.graph.getEdges()
-      @paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}").attr('stroke','black')
-
-  componentWillUnMount: () -> @paper.remove()
-
+SVGComp = React.createClass({
   render: () ->
-    if @isMounted()
-      @paper.clear()
-      @drawTriangles() # TODO only render diff
-    return (div {id:'raphael', ref:'raphael'})
+    paths = for [[x1,y1],[x2,y2]] in @props.graph.getEdges()
+      (path {stroke:'black', fill:'none', d:"M #{x1} #{y1} l #{x2-x1} #{y2-y1}"})
+    return (svg {height:'100%', width:'100%'}, paths )
 });
 
 
