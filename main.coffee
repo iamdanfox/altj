@@ -1,27 +1,4 @@
 
-# initial triangle:
-w = document.body.clientWidth
-h = document.body.clientHeight
-
-randX = () -> w/2 + Math.random()*100 - 50
-randY = () -> h/3 + Math.random()*100 - 50
-
-graph = new Graph([randX(),randY()],
-                  [randX(),randY()],
-                  [randX(),randY()])
-
-# returns a NormalDistribution
-normalDist = NormalDistribution.make(edgelen(graph.edges[0]),
-                               edgelen(graph.edges[1]),
-                               edgelen(graph.edges[2]))
-
-triModalDist = TriModal.make(edgelen(graph.edges[0]),
-                               edgelen(graph.edges[1]),
-                               edgelen(graph.edges[2]))
-
-dist = normalDist
-paper = null
-
 {h1,div,button,input,label} = React.DOM # destructuring assignment
 
 RaphaelComp = React.createClass({ # TODO make this react to graph changes
@@ -40,7 +17,7 @@ RaphaelComp = React.createClass({ # TODO make this react to graph changes
     @drawTriangles()
 
   drawTriangles: () ->
-    for [[x1,y1],[x2,y2]] in graph.getEdges()
+    for [[x1,y1],[x2,y2]] in @props.graph.getEdges()
       @paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}").attr('stroke','black')
 
   componentWillUnMount: () ->
@@ -64,7 +41,7 @@ HistogramComp = React.createClass({
     bucketsize = 5
     offset = -3*bucketsize
     histogram = {}
-    for edge in graph.edges
+    for edge in @props.graph.edges
       l = Math.floor(edgelen edge)
       b = l - (l % bucketsize)
       histogram[b] = if histogram[b]?  then histogram[b] + 1 else histogram[b] = 1
@@ -135,9 +112,23 @@ SidebarComp = React.createClass({
 })
 
 App = React.createClass({
-  getInitialState: () -> # state is mutable up here
-    augmentProportion: 0.8
-    distribution: 'NORMAL'
+  getInitialState: () ->
+    randX = () -> document.body.clientWidth/2 + Math.random()*100 - 50
+    randY = () -> document.body.clientHeight/3 + Math.random()*100 - 50
+
+    return {
+      graph: g = new Graph([randX(),randY()],
+                        [randX(),randY()],
+                        [randX(),randY()])
+      normalDist: NormalDistribution.make(edgelen(g.edges[0]),
+                                         edgelen(g.edges[1]),
+                                         edgelen(g.edges[2]))
+      triModalDist: TriModal.make(edgelen(g.edges[0]),
+                                 edgelen(g.edges[1]),
+                                 edgelen(g.edges[2]))
+      augmentProportion: 0.8
+      distribution: 'NORMAL'
+    }
 
   setSpiky: () ->
     @setState(augmentProportion: 0.8)
@@ -174,7 +165,7 @@ App = React.createClass({
 
   render: () ->
     return (div {}, [
-      RaphaelComp(  ), # TODO pass in graph
+      RaphaelComp( graph: @state.graph ),
       SidebarComp({
         onSetSpiky:@setSpiky,
         onSetRound:@setRound,
@@ -183,10 +174,11 @@ App = React.createClass({
         restart: @restart,
         augmentProportion:@state.augmentProportion
         distribution:     @state.distribution
+        # graph:            @state.graph
         setNormal: @setNormal
         setTriModal: @setTriModal
       }),
-      HistogramComp( ) # TODO pass in graph
+      HistogramComp( graph: @state.graph )
     ])
 })
 
@@ -194,10 +186,12 @@ window.onload = () ->
 
   React.renderComponent( App(), document.getElementsByTagName('body')[0])
 
-
-  # drawgraph()
+  # keypress = (e) ->
+  #   if e.charCode is 13 #ie Enter
+  #     grow()
   # document.getElementsByTagName('body')[0].onkeypress=keypress
   return
+
 
 
 drawgraph = () ->
@@ -207,10 +201,6 @@ drawgraph = () ->
     # console.log "M #{x1} #{y1} l #{x2-x1} #{y2-y1}"
     paper.path("M #{x1} #{y1} l #{x2-x1} #{y2-y1}").attr('stroke','black')
 
-
-# keypress = (e) ->
-#   if e.charCode is 13 #ie Enter
-#     grow()
 
 shortcut = () ->
   # console.log 'shortcut'
