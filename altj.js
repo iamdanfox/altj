@@ -254,8 +254,13 @@ App = React.createClass({
 });
 
 SVGComp = React.createClass({
+  panConfig: null,
   componentDidMount: function() {
-    return SVGPan(this.refs.svg.getDOMNode());
+    return this.panConfig = SVGPan(this.refs.svg.getDOMNode());
+  },
+  componentWillUnmount: function() {
+    this.panConfig.removeHandlers();
+    return this.panConfig = null;
   },
   render: function() {
     var paths, x1, x2, y1, y2;

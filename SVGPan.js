@@ -101,6 +101,14 @@ function SVGPan(root) {
 			window.addEventListener('DOMMouseScroll', handleMouseWheel, false); // Others
 	}
 
+	function removeHandlers(){
+		root.removeEventListener('mouseup', handleMouseUp)
+		root.removeEventListener('mousedown', handleMouseDown)
+		root.removeEventListener('mousemove', handleMouseMove)
+		window.removeEventListener('mousewheel', handleMouseWheel); // Chrome/Safari
+		window.removeEventListener('mousewheel', handleMouseWheel); // Chrome/Safari
+	}
+
 	/**
 	 * Retrieves the root element for SVG manipulation. The element is then cached into the svgRoot global variable.
 	 */
@@ -285,4 +293,6 @@ function SVGPan(root) {
 
 
 	setupHandlers(root);
+
+	return {removeHandlers : removeHandlers}
 }

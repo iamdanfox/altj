@@ -83,8 +83,14 @@ App = React.createClass({
 
 SVGComp = React.createClass({
 
+  panConfig:null
+
   componentDidMount: ()->
-    SVGPan(@refs.svg.getDOMNode())
+    @panConfig = SVGPan(@refs.svg.getDOMNode())
+
+  componentWillUnmount: () ->
+    @panConfig.removeHandlers()
+    @panConfig = null
 
   render: () ->
     paths = for [[x1,y1],[x2,y2]] in @props.graph.getEdges()
