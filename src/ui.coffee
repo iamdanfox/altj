@@ -82,10 +82,17 @@ App = React.createClass({
 
 
 SVGComp = React.createClass({
+
+  componentDidMount: ()->
+    SVGPan(@refs.svg.getDOMNode())
+
   render: () ->
     paths = for [[x1,y1],[x2,y2]] in @props.graph.getEdges()
       (path {stroke:'black', fill:'none', d:"M #{x1} #{y1} l #{x2-x1} #{y2-y1}"})
-    return (svg {height:'100%', width:'100%'}, paths )
+
+    return (svg {height:'100%', width:'100%', ref:'svg'},
+      (React.DOM.g {id:'viewport'}, paths)
+    )
 });
 
 

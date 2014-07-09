@@ -254,6 +254,9 @@ App = React.createClass({
 });
 
 SVGComp = React.createClass({
+  componentDidMount: function() {
+    return SVGPan(this.refs.svg.getDOMNode());
+  },
   render: function() {
     var paths, x1, x2, y1, y2;
     paths = (function() {
@@ -272,8 +275,11 @@ SVGComp = React.createClass({
     }).call(this);
     return svg({
       height: '100%',
-      width: '100%'
-    }, paths);
+      width: '100%',
+      ref: 'svg'
+    }, React.DOM.g({
+      id: 'viewport'
+    }, paths));
   }
 });
 
