@@ -2,6 +2,60 @@
 var App, DistributionComp, Graph, GrowComp, HistogramComp, NormalDistribution, RaphaelComp, SidebarComp, SpikynessComp, TitleComp, TriModal, augment, button, distbetween, div, edgelen, eq, h1, input, intersects, intriangle, label, newpoints, shortcut, _ref,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
+NormalDistribution = (function() {
+  NormalDistribution.make = function(len1, len2, len3) {
+    var mean, variance;
+    mean = (len1 + len2 + len3) / 3;
+    variance = (Math.pow(len1 - mean, 2) + Math.pow(len2 - mean, 2) + Math.pow(len3 - mean, 2)) / 9;
+    return new NormalDistribution(mean, variance);
+  };
+
+  function NormalDistribution(mean, variance) {
+    this.mean = mean;
+    this.variance = variance;
+    this.stdev = Math.sqrt(this.variance);
+  }
+
+  NormalDistribution.prototype.sample = function() {
+    var x;
+    x = (Math.random() - 0.5) * 2 * Math.sqrt(3);
+    return this.stdev * x + this.mean;
+  };
+
+  return NormalDistribution;
+
+})();
+
+TriModal = (function() {
+  TriModal.make = function(len1, len2, len3) {
+    var variance;
+    variance = 5;
+    return new TriModal(len1, variance, len2, variance, len3, variance);
+  };
+
+  function TriModal(m1, v1, m2, v2, m3, v3) {
+    this.normal1 = new NormalDistribution(m1, v1);
+    this.normal2 = new NormalDistribution(m2, v2);
+    this.normal3 = new NormalDistribution(m3, v3);
+  }
+
+  TriModal.prototype.sample = function() {
+    var x;
+    x = Math.random();
+    switch (false) {
+      case !((0 <= x && x < 1 / 3)):
+        return this.normal1.sample();
+      case !((1 / 3 <= x && x < 2 / 3)):
+        return this.normal2.sample();
+      case !((2 / 3 <= x && x <= 1)):
+        return this.normal3.sample();
+    }
+  };
+
+  return TriModal;
+
+})();
+
 Graph = (function() {
   function Graph() {}
 
@@ -94,216 +148,6 @@ Graph = (function() {
   return Graph;
 
 })();
-
-NormalDistribution = (function() {
-  NormalDistribution.make = function(len1, len2, len3) {
-    var mean, variance;
-    mean = (len1 + len2 + len3) / 3;
-    variance = (Math.pow(len1 - mean, 2) + Math.pow(len2 - mean, 2) + Math.pow(len3 - mean, 2)) / 9;
-    return new NormalDistribution(mean, variance);
-  };
-
-  function NormalDistribution(mean, variance) {
-    this.mean = mean;
-    this.variance = variance;
-    this.stdev = Math.sqrt(this.variance);
-  }
-
-  NormalDistribution.prototype.sample = function() {
-    var x;
-    x = (Math.random() - 0.5) * 2 * Math.sqrt(3);
-    return this.stdev * x + this.mean;
-  };
-
-  return NormalDistribution;
-
-})();
-
-TriModal = (function() {
-  TriModal.make = function(len1, len2, len3) {
-    var variance;
-    variance = 5;
-    return new TriModal(len1, variance, len2, variance, len3, variance);
-  };
-
-  function TriModal(m1, v1, m2, v2, m3, v3) {
-    this.normal1 = new NormalDistribution(m1, v1);
-    this.normal2 = new NormalDistribution(m2, v2);
-    this.normal3 = new NormalDistribution(m3, v3);
-  }
-
-  TriModal.prototype.sample = function() {
-    var x;
-    x = Math.random();
-    switch (false) {
-      case !((0 <= x && x < 1 / 3)):
-        return this.normal1.sample();
-      case !((1 / 3 <= x && x < 2 / 3)):
-        return this.normal2.sample();
-      case !((2 / 3 <= x && x <= 1)):
-        return this.normal3.sample();
-    }
-  };
-
-  return TriModal;
-
-})();
-
-intersects = function(_arg, _arg1, _arg2, _arg3) {
-  var a, b, c, d, det, gamma, lambda, p, q, r, s;
-  a = _arg[0], b = _arg[1];
-  c = _arg1[0], d = _arg1[1];
-  p = _arg2[0], q = _arg2[1];
-  r = _arg3[0], s = _arg3[1];
-  det = (c - a) * (s - q) - (r - p) * (d - b);
-  if (det === 0) {
-    return false;
-  } else {
-    lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
-    gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
-    return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
-  }
-};
-
-edgelen = function(_arg) {
-  var x1, x2, y1, y2, _ref, _ref1;
-  (_ref = _arg[0], x1 = _ref[0], y1 = _ref[1]), (_ref1 = _arg[1], x2 = _ref1[0], y2 = _ref1[1]);
-  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-};
-
-distbetween = function(p1, p2) {
-  return edgelen([p1, p2]);
-};
-
-eq = function(_arg, _arg1) {
-  var a1, a2, b1, b2;
-  a1 = _arg[0], a2 = _arg[1];
-  b1 = _arg1[0], b2 = _arg1[1];
-  return a1 === b1 && a2 === b2;
-};
-
-intriangle = function(p1, p2, p3, testp) {
-  var leftmost, lower, rightmost, upper, _ref, _ref1;
-  leftmost = Math.min(p1[0], p2[0], p3[0]);
-  rightmost = Math.max(p1[0], p2[0], p3[0]);
-  lower = Math.min(p1[1], p2[1], p3[1]);
-  upper = Math.max(p1[1], p2[1], p3[1]);
-  return (leftmost <= (_ref = testp[0]) && _ref <= rightmost) && (lower <= (_ref1 = testp[1]) && _ref1 <= upper);
-};
-
-newpoints = function(p1, p2, l1, l2) {
-  var discx, discy, lambda, p, q, r, s, w, w2z2, x1, x2, y1, y2, z;
-  r = p1[0], s = p1[1];
-  p = p2[0], q = p2[1];
-  w = p - r;
-  z = q - s;
-  w2z2 = Math.pow(w, 2) + Math.pow(z, 2);
-  lambda = w2z2 + Math.pow(l1, 2) - Math.pow(l2, 2);
-  discx = Math.pow(w, 2) * Math.pow(lambda, 2) - 4 * w2z2 * (0.25 * Math.pow(lambda, 2) - Math.pow(z, 2) * Math.pow(l1, 2));
-  discy = Math.pow(z, 2) * Math.pow(lambda, 2) - 4 * w2z2 * (0.25 * Math.pow(lambda, 2) - Math.pow(w, 2) * Math.pow(l1, 2));
-  if (discx < 0 || discy < 0) {
-    return [];
-  } else {
-    x1 = (w * lambda + Math.sqrt(discx)) / (2 * w2z2);
-    x2 = (w * lambda - Math.sqrt(discx)) / (2 * w2z2);
-    y1 = (z * lambda + Math.sqrt(discy)) / (2 * w2z2);
-    y2 = (z * lambda - Math.sqrt(discy)) / (2 * w2z2);
-    if (Math.round(l1) !== Math.round(edgelen([p1, [x1 + r, y1 + s]]))) {
-      return [[x1 + r, y2 + s], [x2 + r, y1 + s]];
-    } else {
-      return [[x1 + r, y1 + s], [x2 + r, y2 + s]];
-    }
-  }
-};
-
-shortcut = function(graph) {
-  var bestshortcut, d, i, nointersections, p1, p2, p3, t1, t2, t3, _i, _ref, _ref1, _ref2;
-  if (graph.edges.length < 6) {
-    return false;
-  }
-  bestshortcut = Infinity;
-  for (i = _i = 0, _ref = graph.exteriors.length - 2; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-    _ref1 = graph.exteriors.slice(i, +(i + 2) + 1 || 9e9), t1 = _ref1[0], t2 = _ref1[1], t3 = _ref1[2];
-    d = distbetween(t1, t3);
-    nointersections = function() {
-      var a, b, _j, _len, _ref2, _ref3;
-      _ref2 = graph.edges;
-      for (_j = 0, _len = _ref2.length; _j < _len; _j++) {
-        _ref3 = _ref2[_j], a = _ref3[0], b = _ref3[1];
-        if (intersects(a, b, t1, t3)) {
-          return false;
-        }
-      }
-      return true;
-    };
-    if (d < bestshortcut && !graph.hasEdge([t1, t3]) && nointersections()) {
-      bestshortcut = d;
-      _ref2 = [t1, t2, t3], p1 = _ref2[0], p2 = _ref2[1], p3 = _ref2[2];
-    }
-  }
-  if (bestshortcut < Infinity) {
-    graph.shortcut(p1, p2, p3);
-    console.log('shortcut success!');
-    return true;
-  } else {
-    console.log('convex');
-    return false;
-  }
-};
-
-augment = function(graph, dist) {
-  var i, l1, l2, n1, n2, nps, p1, p2, safeToAdd;
-  l1 = dist.sample();
-  l2 = dist.sample();
-  i = Math.floor(Math.random() * (graph.exteriors.length - 1));
-  p1 = graph.exteriors[i];
-  p2 = graph.exteriors[i + 1];
-  nps = newpoints(p1, p2, l1, l2);
-  if (nps.length > 0) {
-    n1 = nps[0], n2 = nps[1];
-    safeToAdd = function(testpoint) {
-      var a, b, c, p, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3;
-      _ref = graph.points;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        p = _ref[_i];
-        if (distbetween(p, testpoint) < 20) {
-          return false;
-        }
-      }
-      _ref1 = graph.adjacentpoints(p1);
-      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        c = _ref1[_j];
-        if ((__indexOf.call(graph.adjacentpoints(p2), c) >= 0)) {
-          if (intriangle(p1, p2, c, testpoint)) {
-            return false;
-          }
-        }
-      }
-      _ref2 = graph.edges;
-      for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-        _ref3 = _ref2[_k], a = _ref3[0], b = _ref3[1];
-        if (intersects(a, b, testpoint, p1)) {
-          return false;
-        }
-        if (intersects(a, b, testpoint, p2)) {
-          return false;
-        }
-      }
-      return true;
-    };
-    if (safeToAdd(n2)) {
-      graph.extend(p1, p2, n2);
-      return console.log('augmented');
-    } else if (safeToAdd(n1)) {
-      graph.extend(p1, p2, n1);
-      return console.log('augmented');
-    } else {
-      return augment(graph, dist);
-    }
-  } else {
-    return augment(graph, dist);
-  }
-};
 
 _ref = React.DOM, h1 = _ref.h1, div = _ref.div, button = _ref.button, input = _ref.input, label = _ref.label;
 
@@ -579,3 +423,159 @@ DistributionComp = React.createClass({
     ]);
   }
 });
+
+intersects = function(_arg, _arg1, _arg2, _arg3) {
+  var a, b, c, d, det, gamma, lambda, p, q, r, s;
+  a = _arg[0], b = _arg[1];
+  c = _arg1[0], d = _arg1[1];
+  p = _arg2[0], q = _arg2[1];
+  r = _arg3[0], s = _arg3[1];
+  det = (c - a) * (s - q) - (r - p) * (d - b);
+  if (det === 0) {
+    return false;
+  } else {
+    lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+    gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+    return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
+  }
+};
+
+edgelen = function(_arg) {
+  var x1, x2, y1, y2, _ref1, _ref2;
+  (_ref1 = _arg[0], x1 = _ref1[0], y1 = _ref1[1]), (_ref2 = _arg[1], x2 = _ref2[0], y2 = _ref2[1]);
+  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+};
+
+distbetween = function(p1, p2) {
+  return edgelen([p1, p2]);
+};
+
+eq = function(_arg, _arg1) {
+  var a1, a2, b1, b2;
+  a1 = _arg[0], a2 = _arg[1];
+  b1 = _arg1[0], b2 = _arg1[1];
+  return a1 === b1 && a2 === b2;
+};
+
+intriangle = function(p1, p2, p3, testp) {
+  var leftmost, lower, rightmost, upper, _ref1, _ref2;
+  leftmost = Math.min(p1[0], p2[0], p3[0]);
+  rightmost = Math.max(p1[0], p2[0], p3[0]);
+  lower = Math.min(p1[1], p2[1], p3[1]);
+  upper = Math.max(p1[1], p2[1], p3[1]);
+  return (leftmost <= (_ref1 = testp[0]) && _ref1 <= rightmost) && (lower <= (_ref2 = testp[1]) && _ref2 <= upper);
+};
+
+newpoints = function(p1, p2, l1, l2) {
+  var discx, discy, lambda, p, q, r, s, w, w2z2, x1, x2, y1, y2, z;
+  r = p1[0], s = p1[1];
+  p = p2[0], q = p2[1];
+  w = p - r;
+  z = q - s;
+  w2z2 = Math.pow(w, 2) + Math.pow(z, 2);
+  lambda = w2z2 + Math.pow(l1, 2) - Math.pow(l2, 2);
+  discx = Math.pow(w, 2) * Math.pow(lambda, 2) - 4 * w2z2 * (0.25 * Math.pow(lambda, 2) - Math.pow(z, 2) * Math.pow(l1, 2));
+  discy = Math.pow(z, 2) * Math.pow(lambda, 2) - 4 * w2z2 * (0.25 * Math.pow(lambda, 2) - Math.pow(w, 2) * Math.pow(l1, 2));
+  if (discx < 0 || discy < 0) {
+    return [];
+  } else {
+    x1 = (w * lambda + Math.sqrt(discx)) / (2 * w2z2);
+    x2 = (w * lambda - Math.sqrt(discx)) / (2 * w2z2);
+    y1 = (z * lambda + Math.sqrt(discy)) / (2 * w2z2);
+    y2 = (z * lambda - Math.sqrt(discy)) / (2 * w2z2);
+    if (Math.round(l1) !== Math.round(edgelen([p1, [x1 + r, y1 + s]]))) {
+      return [[x1 + r, y2 + s], [x2 + r, y1 + s]];
+    } else {
+      return [[x1 + r, y1 + s], [x2 + r, y2 + s]];
+    }
+  }
+};
+
+shortcut = function(graph) {
+  var bestshortcut, d, i, nointersections, p1, p2, p3, t1, t2, t3, _i, _ref1, _ref2, _ref3;
+  if (graph.edges.length < 6) {
+    return false;
+  }
+  bestshortcut = Infinity;
+  for (i = _i = 0, _ref1 = graph.exteriors.length - 2; 0 <= _ref1 ? _i < _ref1 : _i > _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
+    _ref2 = graph.exteriors.slice(i, +(i + 2) + 1 || 9e9), t1 = _ref2[0], t2 = _ref2[1], t3 = _ref2[2];
+    d = distbetween(t1, t3);
+    nointersections = function() {
+      var a, b, _j, _len, _ref3, _ref4;
+      _ref3 = graph.edges;
+      for (_j = 0, _len = _ref3.length; _j < _len; _j++) {
+        _ref4 = _ref3[_j], a = _ref4[0], b = _ref4[1];
+        if (intersects(a, b, t1, t3)) {
+          return false;
+        }
+      }
+      return true;
+    };
+    if (d < bestshortcut && !graph.hasEdge([t1, t3]) && nointersections()) {
+      bestshortcut = d;
+      _ref3 = [t1, t2, t3], p1 = _ref3[0], p2 = _ref3[1], p3 = _ref3[2];
+    }
+  }
+  if (bestshortcut < Infinity) {
+    graph.shortcut(p1, p2, p3);
+    console.log('shortcut success!');
+    return true;
+  } else {
+    console.log('convex');
+    return false;
+  }
+};
+
+augment = function(graph, dist) {
+  var i, l1, l2, n1, n2, nps, p1, p2, safeToAdd;
+  l1 = dist.sample();
+  l2 = dist.sample();
+  i = Math.floor(Math.random() * (graph.exteriors.length - 1));
+  p1 = graph.exteriors[i];
+  p2 = graph.exteriors[i + 1];
+  nps = newpoints(p1, p2, l1, l2);
+  if (nps.length > 0) {
+    n1 = nps[0], n2 = nps[1];
+    safeToAdd = function(testpoint) {
+      var a, b, c, p, _i, _j, _k, _len, _len1, _len2, _ref1, _ref2, _ref3, _ref4;
+      _ref1 = graph.points;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        p = _ref1[_i];
+        if (distbetween(p, testpoint) < 20) {
+          return false;
+        }
+      }
+      _ref2 = graph.adjacentpoints(p1);
+      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+        c = _ref2[_j];
+        if ((__indexOf.call(graph.adjacentpoints(p2), c) >= 0)) {
+          if (intriangle(p1, p2, c, testpoint)) {
+            return false;
+          }
+        }
+      }
+      _ref3 = graph.edges;
+      for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
+        _ref4 = _ref3[_k], a = _ref4[0], b = _ref4[1];
+        if (intersects(a, b, testpoint, p1)) {
+          return false;
+        }
+        if (intersects(a, b, testpoint, p2)) {
+          return false;
+        }
+      }
+      return true;
+    };
+    if (safeToAdd(n2)) {
+      graph.extend(p1, p2, n2);
+      return console.log('augmented');
+    } else if (safeToAdd(n1)) {
+      graph.extend(p1, p2, n1);
+      return console.log('augmented');
+    } else {
+      return augment(graph, dist);
+    }
+  } else {
+    return augment(graph, dist);
+  }
+};
