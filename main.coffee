@@ -1,7 +1,7 @@
 
 {h1,div,button,input,label} = React.DOM # destructuring assignment
 
-RaphaelComp = React.createClass({ # TODO make this react to graph changes
+RaphaelComp = React.createClass({
   paper: null
 
   componentDidMount: () ->
@@ -10,7 +10,6 @@ RaphaelComp = React.createClass({ # TODO make this react to graph changes
     w = document.body.clientWidth
     h = document.body.clientHeight
     @paper = new Raphael(elem,w,h);
-    paper = @paper               # TODO delete
     # make ZPD
     @paper.ZPD({ zoom: true, pan: true, drag: false });
 
@@ -33,11 +32,11 @@ RaphaelComp = React.createClass({ # TODO make this react to graph changes
 HistogramComp = React.createClass({
   paper2: null
 
+
   componentDidMount: () ->
     # initialise raphael
     elem = @refs.histogram.getDOMNode()
     @paper2 = new Raphael(elem,500,200);
-    paper2 = @paper2               # TODO delete this hack
     @drawBars()
 
   drawBars: () ->
@@ -165,7 +164,7 @@ App = React.createClass({
       if @state.graph.points.length < target
         @grow()
         setTimeout cont, 5
-    cont()
+    cont() # TODO store isGrowing in props
 
     # hacky way of notifying react
     @setState(graph:@state.graph)
@@ -192,7 +191,6 @@ App = React.createClass({
         restart: @restart,
         augmentProportion:@state.augmentProportion
         distribution:     @state.distribution
-        # graph:            @state.graph
         setNormal: @setNormal
         setTriModal: @setTriModal
       }),

@@ -221,12 +221,11 @@ _ref = React.DOM, h1 = _ref.h1, div = _ref.div, button = _ref.button, input = _r
 RaphaelComp = React.createClass({
   paper: null,
   componentDidMount: function() {
-    var elem, h, paper, w;
+    var elem, h, w;
     elem = this.refs.raphael.getDOMNode();
     w = document.body.clientWidth;
     h = document.body.clientHeight;
     this.paper = new Raphael(elem, w, h);
-    paper = this.paper;
     this.paper.ZPD({
       zoom: true,
       pan: true,
@@ -262,10 +261,9 @@ RaphaelComp = React.createClass({
 HistogramComp = React.createClass({
   paper2: null,
   componentDidMount: function() {
-    var elem, paper2;
+    var elem;
     elem = this.refs.histogram.getDOMNode();
     this.paper2 = new Raphael(elem, 500, 200);
-    paper2 = this.paper2;
     return this.drawBars();
   },
   drawBars: function() {
