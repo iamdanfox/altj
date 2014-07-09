@@ -23,9 +23,9 @@ dist = normalDist
 
 # paper2 = new Raphael(document.getElementById('dist-graph'),500,200)
 
-{h1,a,div} = React.DOM # destructuring assignment
+{h1,a,div,button} = React.DOM # destructuring assignment
 
-RaphaelComponent = React.createClass({
+RaphaelComp = React.createClass({
   render: () ->
     d = (div {id:'raphael'})
     # TODO initialise as Raphael
@@ -44,29 +44,43 @@ TitleComp = React.createClass({
     )
 })
 
+GrowComp = React.createClass({
+  # TODO bind these buttons
+  render: () ->
+    (div {className:'section'}, [
+      (button {title:'or Press Enter'}, "Grow"),
+      (button {}, "Grow 20"),
+      (button {}, "Restart")
+    ])
+})
+
 
 SidebarComp = React.createClass({
   render: () ->
     return (div {className:'sidebar'}, [
       TitleComp(),
-      # GrowComp(),
+      GrowComp(),
       # SpikynessComp(),
       # DistributionComp()
+    ])
+})
+
+App = React.createClass({
+  render: () ->
+    return (div {}, [
+      RaphaelComp(),
+      SidebarComp({spikyness: 'SPIKY', distribution: 'NORMAL'})
     ])
 })
 
 
 window.onload = () ->
 
-  console.debug RaphaelComponent
-  React.renderComponent( SidebarComp(), document.getElementsByTagName('body')[0])
+  React.renderComponent( App(), document.getElementsByTagName('body')[0])
 
   # only insert buttons when everything else has already been set up
   # document.getElementsByClassName('sidebar')[0].innerHTML += """
   # <div class="section">
-  #   <button title="or press Enter" onclick="grow()">Grow</button>
-  #   <button onclick="growN(20)">Grow 20</button>
-  #   <button onclick="window.location=window.location">Restart</button>
   # </div>
   #
   # <div class="section">
