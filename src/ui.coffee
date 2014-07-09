@@ -62,24 +62,20 @@ App = React.createClass({
   setTriModal: () ->  @setState(distribution: 'TRI_MODAL')
 
   render: () -> `(<div>
-      <h1>Hello</h1>
+      <RaphaelComp graph={this.state.graph} />
+      <SidebarComp
+        onSetSpiky={this.state.setSpiky}
+        onSetRound={this.state.setRound}
+        grow={ this.state.grow}
+        grow20={ this.state.grow20}
+        restart={ this.state.restart}
+        augmentProportion={this.state.augmentProportion}
+        distribution=     {this.state.distribution}
+        setNormal={ this.state.setNormal}
+        setTriModal={ this.state.setTriModal}
+      />
+      <HistogramComp graph={this.state.graph} />
     </div>)`
-
-    # (div {}, [
-    #   RaphaelComp( graph: @state.graph ),
-    #   SidebarComp({
-    #     onSetSpiky:@setSpiky,
-    #     onSetRound:@setRound,
-    #     grow: @grow,
-    #     grow20: @grow20,
-    #     restart: @restart,
-    #     augmentProportion:@state.augmentProportion
-    #     distribution:     @state.distribution
-    #     setNormal: @setNormal
-    #     setTriModal: @setTriModal
-    #   }),
-    #   HistogramComp( graph: @state.graph )
-    # ])
 })
 
 

@@ -389,7 +389,19 @@ App = React.createClass({displayName: 'App',
   },
   render: function() {
     return (React.DOM.div(null, 
-      React.DOM.h1(null, "Hello")
+      RaphaelComp( {graph:this.state.graph} ),
+      SidebarComp(
+        {onSetSpiky:this.state.setSpiky,
+        onSetRound:this.state.setRound,
+        grow: this.state.grow,
+        grow20: this.state.grow20,
+        restart: this.state.restart,
+        augmentProportion:this.state.augmentProportion,
+        distribution:     this.state.distribution,
+        setNormal: this.state.setNormal,
+        setTriModal: this.state.setTriModal}
+      ),
+      HistogramComp( {graph:this.state.graph} )
     ));
   }
 });
