@@ -61,11 +61,9 @@ App = React.createClass({
 
   setTriModal: () ->  @setState(distribution: 'TRI_MODAL')
 
-  render: () -> (`
-    <div>
-      <RaphaelComp graph=this.state.graph />
-      HistogramComp graph=this.state.graph />
-    </div>`)
+  render: () -> `(<div>
+      <h1>Hello</h1>
+    </div>)`
 
     # (div {}, [
     #   RaphaelComp( graph: @state.graph ),
