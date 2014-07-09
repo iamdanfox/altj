@@ -1,5 +1,5 @@
 
-{h1,div,button,input,label,svg,path} = React.DOM # destructuring assignment
+{h1,div,button,input,label,svg,path,rect} = React.DOM # destructuring assignment
 
 App = React.createClass({
   getInitialState: () ->
@@ -104,13 +104,13 @@ SVGComp = React.createClass({
 
 
 HistogramComp = React.createClass({
-  paper2: null
+  # paper2: null
 
-  componentDidMount: () ->
-    @paper2 = new Raphael(@refs.histogram.getDOMNode(),
-      @props.width,
-      @props.height)
-    @drawBars()
+  # componentDidMount: () ->
+  #   @paper2 = new Raphael(@refs.histogram.getDOMNode(),
+  #     @props.width,
+  #     @props.height)
+  #   @drawBars()
 
   drawBars: () ->
     bucketsize = 5
@@ -129,17 +129,24 @@ HistogramComp = React.createClass({
     while maxY*yScale > @props.height
       yScale = yScale / 2
 
-    for x, y of histogram
+    return (for x, y of histogram
       h = y*yScale # bar height
-      @paper2.rect(x*2.2,@props.height-h,bucketsize*2,h).attr('fill':'#555', stroke:'none')
+      # @paper2.rect(x*2.2,@props.height-h,bucketsize*2,h).attr('fill':'#555', stroke:'none')
+      (rect {x:x*2.2, y:@props.height-h,  width:bucketsize*2, height: h, fill:'#555', stroke:'none'})
+    )
 
-  componentWillUnMount: () -> @paper2.remove()
+  # componentWillUnMount: () -> @paper2.remove()
 
   render: () ->
-    if @isMounted()
-      @paper2.clear()
-      @drawBars() # TODO only render diff
-    (div {id:'dist-graph', title:'Histogram of line lengths', ref:'histogram'})
+    # if @isMounted()
+    #   @paper2.clear()
+    #   @drawBars() # TODO only render diff
+      # <rect x="154" y="152" width="10" height="48" r="0" rx="0" ry="0" fill="#555555" stroke="none" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></rect>
+
+
+    (div {id:'dist-graph', title:'Histogram of line lengths', ref:'histogram', height:@props.height, width:@props.width},
+    (svg {}, @drawBars())
+    )
 })
 
 
