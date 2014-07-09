@@ -245,7 +245,9 @@ App = React.createClass({
         setNormal: this.setNormal,
         setTriModal: this.setTriModal
       }), HistogramComp({
-        graph: this.state.graph
+        graph: this.state.graph,
+        width: 500,
+        height: 200
       })
     ]);
   }
@@ -292,13 +294,12 @@ RaphaelComp = React.createClass({
 HistogramComp = React.createClass({
   paper2: null,
   componentDidMount: function() {
-    this.paper2 = new Raphael(this.refs.histogram.getDOMNode(), 500, 200);
+    this.paper2 = new Raphael(this.refs.histogram.getDOMNode(), this.props.width, this.props.height);
     return this.drawBars();
   },
   drawBars: function() {
-    var b, bucketsize, edge, h, histogram, key, l, offset, val, _i, _len, _ref1, _results;
+    var b, bucketsize, edge, h, histogram, l, maxY, x, y, yScale, _i, _len, _ref1, _results;
     bucketsize = 5;
-    offset = -3 * bucketsize;
     histogram = {};
     _ref1 = this.props.graph.edges;
     for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
@@ -307,11 +308,20 @@ HistogramComp = React.createClass({
       b = l - (l % bucketsize);
       histogram[b] = histogram[b] != null ? histogram[b] + 1 : histogram[b] = 1;
     }
+    maxY = 0;
+    for (x in histogram) {
+      y = histogram[x];
+      maxY = Math.max(maxY, y);
+    }
+    yScale = 3;
+    while (maxY * yScale > this.props.height) {
+      yScale = yScale / 2;
+    }
     _results = [];
-    for (key in histogram) {
-      val = histogram[key];
-      h = val * 3;
-      _results.push(this.paper2.rect(offset + key * 2.2, 190 - h, bucketsize * 2, h).attr({
+    for (x in histogram) {
+      y = histogram[x];
+      h = y * yScale;
+      _results.push(this.paper2.rect(x * 2.2, this.props.height - h, bucketsize * 2, h).attr({
         'fill': '#555',
         stroke: 'none'
       }));

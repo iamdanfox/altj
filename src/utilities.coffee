@@ -22,7 +22,6 @@ intriangle = (p1,p2,p3,testp) ->
   rightmost = Math.max p1[0],p2[0],p3[0]
   lower = Math.min p1[1],p2[1],p3[1]
   upper = Math.max p1[1],p2[1],p3[1]
-  # if testpoint in triangle p1,p2,c return false
   return leftmost<=testp[0]<=rightmost and lower<=testp[1]<=upper
 
 # finds new points such that p3 is len1 from p1 and len2 from p2

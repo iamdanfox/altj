@@ -75,7 +75,7 @@ App = React.createClass({
         setNormal: @setNormal
         setTriModal: @setTriModal
       }),
-      HistogramComp( graph: @state.graph )
+      HistogramComp( graph: @state.graph, width:500, height: 200 )
     ])
 })
 
@@ -109,21 +109,31 @@ HistogramComp = React.createClass({
   paper2: null
 
   componentDidMount: () ->
-    @paper2 = new Raphael(@refs.histogram.getDOMNode(), 500, 200)
+    @paper2 = new Raphael(@refs.histogram.getDOMNode(),
+      @props.width,
+      @props.height)
     @drawBars()
 
   drawBars: () ->
     bucketsize = 5
-    offset = -3*bucketsize
     histogram = {}
     for edge in @props.graph.edges
       l = Math.floor(edgelen edge)
       b = l - (l % bucketsize)
       histogram[b] = if histogram[b]?  then histogram[b] + 1 else histogram[b] = 1
 
-    for key, val of histogram
-      h = val*3
-      @paper2.rect(offset+key*2.2,190-h,bucketsize*2,h).attr('fill':'#555', stroke:'none')
+    # perform scaling
+    maxY = 0
+    for x, y of histogram
+      maxY = Math.max maxY, y
+
+    yScale = 3
+    while maxY*yScale > @props.height
+      yScale = yScale / 2
+
+    for x, y of histogram
+      h = y*yScale # bar height
+      @paper2.rect(x*2.2,@props.height-h,bucketsize*2,h).attr('fill':'#555', stroke:'none')
 
   componentWillUnMount: () -> @paper2.remove()
 
