@@ -23,9 +23,11 @@ dist = normalDist
 
 # paper2 = new Raphael(document.getElementById('dist-graph'),500,200)
 
-{h1,a,div,button} = React.DOM # destructuring assignment
+{h1,a,div,button,input,label} = React.DOM # destructuring assignment
 
 RaphaelComp = React.createClass({
+  #maybe use componentWillMount? or componentDidMount
+  # use refs
   render: () ->
     d = (div {id:'raphael'})
     # TODO initialise as Raphael
@@ -44,32 +46,83 @@ TitleComp = React.createClass({
     )
 })
 
+AUGMENT_PROPORTION = 0.8 #shift to props
+
 GrowComp = React.createClass({
-  # TODO bind these buttons
+  grow: () ->
+    console.log 'grow()'
+    console.debug @
+    if Math.random() > @props.augmentProportion # good values: 0.8 or 0.7
+      success = shortcut()
+      if not success
+        augment()
+    else
+      augment()
+
+  grow20: () ->
+    console.log 'grow20()'
+    growN = (n) ->
+      target = graph.points.length + n
+      cont = () ->
+        if graph.points.length < target then @grow()
+        setTimeout cont, 5
+      cont()
+
+    growN(20)
+
+  restart: () ->
+    alert('unimplemented')
+
   render: () ->
     (div {className:'section'}, [
-      (button {title:'or Press Enter'}, "Grow"),
-      (button {}, "Grow 20"),
-      (button {}, "Restart")
+      (button {title:'or Press Enter',onClick:@grow}, "Grow"),
+      (button {onClick:@grow20}, "Grow 20"),
+      (button {onclick:@restart}, "Restart")
     ])
 })
 
+SPIKY: 0.8
+ROUND: 0.6
+
+SpikynessComp = React.createClass({
+  # props are immutable
+  render: () ->
+    (div {className:'section'}, [
+      (input {onClick:@props.onSetSpiky, name:'spikyness', type:'radio', checked:@props.augmentProportion is 0.8}),
+      (label {onClick:@props.onSetSpiky}, "Spiky"),
+      (input {onClick:@props.onSetRound, name:'spikyness', type:'radio', checked:@props.augmentProportion is 0.6}),
+      (label {onClick:@props.onSetRound}, "Round"),
+    ])
+})
 
 SidebarComp = React.createClass({
   render: () ->
     return (div {className:'sidebar'}, [
       TitleComp(),
-      GrowComp(),
-      # SpikynessComp(),
+      GrowComp(@props),
+      SpikynessComp(@props), # TODO: limit what goes down?
       # DistributionComp()
     ])
 })
 
 App = React.createClass({
+  getInitialState: () -> # state is mutable up here
+    {augmentProportion: 0.8, distribution: 'NORMAL'}
+
+  setSpiky: () ->
+    @setState(augmentProportion: 0.8)
+
+  setRound: () ->
+    @setState(augmentProportion: 0.6)
+
   render: () ->
     return (div {}, [
       RaphaelComp(),
-      SidebarComp({spikyness: 'SPIKY', distribution: 'NORMAL'})
+      SidebarComp({
+        onSetSpiky:@setSpiky,
+        onSetRound:@setRound,
+        augmentProportion:@state.augmentProportion
+      })
     ])
 })
 
@@ -78,17 +131,7 @@ window.onload = () ->
 
   React.renderComponent( App(), document.getElementsByTagName('body')[0])
 
-  # only insert buttons when everything else has already been set up
-  # document.getElementsByClassName('sidebar')[0].innerHTML += """
-  # <div class="section">
-  # </div>
-  #
-  # <div class="section">
-  #   <input type="radio" name="spikyness" id="spiky" checked onclick="setSpiky()" />
-  #     <label for="spiky">Spiky</label>
-  #   <input type="radio" name="spikyness" id="round" onclick="setRound()" />
-  #     <label for="round">Round</label>
-  # </div>
+
   #
   # <div class="section">
   #   <input type="radio" name="distribution" id="moreRandom" checked onclick="setMoreRandom()" />
@@ -124,33 +167,6 @@ drawgraph = () ->
     h = val*3
     paper2.rect(offset+key*2.2,190-h,bucketsize*2,h).attr('fill':'#555', stroke:'none')
 
-
-AUGMENT_PROPORTION = 0.8
-
-grow = () ->
-  if Math.random() > AUGMENT_PROPORTION # good values: 0.8 or 0.7
-    success = shortcut()
-    if not success
-      augment()
-  else
-    augment()
-
-growN = (n) ->
-  target = graph.points.length + n
-
-  cont = () ->
-    if graph.points.length < target then grow()
-    setTimeout cont, 5
-
-  cont()
-
-setSpiky = () ->
-  console.log 'setSpiky'
-  AUGMENT_PROPORTION = 0.8
-
-setRound = () ->
-  console.log 'setRound'
-  AUGMENT_PROPORTION = 0.6
 
 setMoreRandom = () ->
   dist = normalDist
