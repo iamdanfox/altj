@@ -18,7 +18,6 @@
   ],
   "dependencies": {
     "react": "~0.10.0",
-    "raphael": "~2.1.2",
-    "raphael-zpd": "git://github.com/semiaddict/raphael-zpd.git"
+    "raphael": "~2.1.2"
   }
 }
