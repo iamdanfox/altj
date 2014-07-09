@@ -1,5 +1,4 @@
 <!doctype html>
-
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -27,11 +26,14 @@
   </style>
 
   <script src="bower_components/react/react.min.js"></script>
+  <script src="bower_components/raphael/raphael-min.js"></script>
+  <script src="bower_components/raphael-zpd/raphael-zpd.js"></script>
+  <script src="altj.js"></script>
 </head>
 
 <body>
-<script src="bower_components/raphael/raphael-min.js"></script>
-<script src="bower_components/raphael-zpd/raphael-zpd.js"></script>
-<script src="altj.js"></script>
+<script type="text/javascript">
+  React.renderComponent( App(), document.getElementsByTagName('body')[0])
+</script>
 </body>
 </html>

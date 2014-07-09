@@ -216,16 +216,203 @@ newpoints = function(p1, p2, l1, l2) {
   }
 };
 
+shortcut = function(graph) {
+  var bestshortcut, d, i, nointersections, p1, p2, p3, t1, t2, t3, _i, _ref, _ref1, _ref2;
+  if (graph.edges.length < 6) {
+    return false;
+  }
+  bestshortcut = Infinity;
+  for (i = _i = 0, _ref = graph.exteriors.length - 2; 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
+    _ref1 = graph.exteriors.slice(i, +(i + 2) + 1 || 9e9), t1 = _ref1[0], t2 = _ref1[1], t3 = _ref1[2];
+    d = distbetween(t1, t3);
+    nointersections = function() {
+      var a, b, _j, _len, _ref2, _ref3;
+      _ref2 = graph.edges;
+      for (_j = 0, _len = _ref2.length; _j < _len; _j++) {
+        _ref3 = _ref2[_j], a = _ref3[0], b = _ref3[1];
+        if (intersects(a, b, t1, t3)) {
+          return false;
+        }
+      }
+      return true;
+    };
+    if (d < bestshortcut && !graph.hasEdge([t1, t3]) && nointersections()) {
+      bestshortcut = d;
+      _ref2 = [t1, t2, t3], p1 = _ref2[0], p2 = _ref2[1], p3 = _ref2[2];
+    }
+  }
+  if (bestshortcut < Infinity) {
+    graph.shortcut(p1, p2, p3);
+    console.log('shortcut success!');
+    return true;
+  } else {
+    console.log('convex');
+    return false;
+  }
+};
+
+augment = function(graph, dist) {
+  var i, l1, l2, n1, n2, nps, p1, p2, safeToAdd;
+  l1 = dist.sample();
+  l2 = dist.sample();
+  i = Math.floor(Math.random() * (graph.exteriors.length - 1));
+  p1 = graph.exteriors[i];
+  p2 = graph.exteriors[i + 1];
+  nps = newpoints(p1, p2, l1, l2);
+  if (nps.length > 0) {
+    n1 = nps[0], n2 = nps[1];
+    safeToAdd = function(testpoint) {
+      var a, b, c, p, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3;
+      _ref = graph.points;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        p = _ref[_i];
+        if (distbetween(p, testpoint) < 20) {
+          return false;
+        }
+      }
+      _ref1 = graph.adjacentpoints(p1);
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        c = _ref1[_j];
+        if ((__indexOf.call(graph.adjacentpoints(p2), c) >= 0)) {
+          if (intriangle(p1, p2, c, testpoint)) {
+            return false;
+          }
+        }
+      }
+      _ref2 = graph.edges;
+      for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+        _ref3 = _ref2[_k], a = _ref3[0], b = _ref3[1];
+        if (intersects(a, b, testpoint, p1)) {
+          return false;
+        }
+        if (intersects(a, b, testpoint, p2)) {
+          return false;
+        }
+      }
+      return true;
+    };
+    if (safeToAdd(n2)) {
+      graph.extend(p1, p2, n2);
+      return console.log('augmented');
+    } else if (safeToAdd(n1)) {
+      graph.extend(p1, p2, n1);
+      return console.log('augmented');
+    } else {
+      return augment(graph, dist);
+    }
+  } else {
+    return augment(graph, dist);
+  }
+};
+
 _ref = React.DOM, h1 = _ref.h1, div = _ref.div, button = _ref.button, input = _ref.input, label = _ref.label;
+
+App = React.createClass({
+  getInitialState: function() {
+    var g, randX, randY;
+    randX = function() {
+      return document.body.clientWidth / 2 + Math.random() * 100 - 50;
+    };
+    randY = function() {
+      return document.body.clientHeight / 3 + Math.random() * 100 - 50;
+    };
+    g = new Graph();
+    g.intialise3points([randX(), randY()], [randX(), randY()], [randX(), randY()]);
+    return {
+      graph: g,
+      normalDist: NormalDistribution.make(edgelen(g.edges[0]), edgelen(g.edges[1]), edgelen(g.edges[2])),
+      triModalDist: TriModal.make(edgelen(g.edges[0]), edgelen(g.edges[1]), edgelen(g.edges[2])),
+      augmentProportion: 0.8,
+      distribution: 'NORMAL'
+    };
+  },
+  setSpiky: function() {
+    return this.setState({
+      augmentProportion: 0.8
+    });
+  },
+  setRound: function() {
+    return this.setState({
+      augmentProportion: 0.6
+    });
+  },
+  grow: function() {
+    var dist, success;
+    dist = this.state.distribution === 'NORMAL' ? this.state.normalDist : this.state.triModalDist;
+    if (Math.random() > this.state.augmentProportion) {
+      success = shortcut(this.state.graph);
+      if (!success) {
+        augment(this.state.graph, dist);
+      }
+    } else {
+      augment(this.state.graph, dist);
+    }
+    this.setState({
+      graph: this.state.graph
+    });
+  },
+  grow20: function() {
+    var cont, target;
+    target = this.state.graph.points.length + 20;
+    cont = (function(_this) {
+      return function() {
+        if (_this.state.graph.points.length < target) {
+          _this.grow();
+          return setTimeout(cont, 5);
+        }
+      };
+    })(this);
+    cont();
+    this.setState({
+      graph: this.state.graph
+    });
+  },
+  restart: function() {
+    var graph, normalDist, triModalDist, _ref1;
+    _ref1 = this.getInitialState(), graph = _ref1.graph, normalDist = _ref1.normalDist, triModalDist = _ref1.triModalDist;
+    return this.setState({
+      graph: graph,
+      normalDist: normalDist,
+      triModalDist: triModalDist
+    });
+  },
+  setNormal: function() {
+    return this.setState({
+      distribution: 'NORMAL'
+    });
+  },
+  setTriModal: function() {
+    return this.setState({
+      distribution: 'TRI_MODAL'
+    });
+  },
+  render: function() {
+    return div({}, [
+      RaphaelComp({
+        graph: this.state.graph
+      }), SidebarComp({
+        onSetSpiky: this.setSpiky,
+        onSetRound: this.setRound,
+        grow: this.grow,
+        grow20: this.grow20,
+        restart: this.restart,
+        augmentProportion: this.state.augmentProportion,
+        distribution: this.state.distribution,
+        setNormal: this.setNormal,
+        setTriModal: this.setTriModal
+      }), HistogramComp({
+        graph: this.state.graph
+      })
+    ]);
+  }
+});
 
 RaphaelComp = React.createClass({
   paper: null,
   componentDidMount: function() {
-    var elem, h, w;
+    var elem;
     elem = this.refs.raphael.getDOMNode();
-    w = document.body.clientWidth;
-    h = document.body.clientHeight;
-    this.paper = new Raphael(elem, w, h);
+    this.paper = new Raphael(elem, document.body.clientWidth, document.body.clientHeight);
     this.paper.ZPD({
       zoom: true,
       pan: true,
@@ -261,9 +448,7 @@ RaphaelComp = React.createClass({
 HistogramComp = React.createClass({
   paper2: null,
   componentDidMount: function() {
-    var elem;
-    elem = this.refs.histogram.getDOMNode();
-    this.paper2 = new Raphael(elem, 500, 200);
+    this.paper2 = new Raphael(this.refs.histogram.getDOMNode(), 500, 200);
     return this.drawBars();
   },
   drawBars: function() {
@@ -302,6 +487,14 @@ HistogramComp = React.createClass({
       title: 'Histogram of line lengths',
       ref: 'histogram'
     });
+  }
+});
+
+SidebarComp = React.createClass({
+  render: function() {
+    return div({
+      className: 'sidebar'
+    }, [TitleComp(), GrowComp(this.props), SpikynessComp(this.props), DistributionComp(this.props)]);
   }
 });
 
@@ -386,206 +579,3 @@ DistributionComp = React.createClass({
     ]);
   }
 });
-
-SidebarComp = React.createClass({
-  render: function() {
-    return div({
-      className: 'sidebar'
-    }, [TitleComp(), GrowComp(this.props), SpikynessComp(this.props), DistributionComp(this.props)]);
-  }
-});
-
-App = React.createClass({
-  getInitialState: function() {
-    var g, randX, randY;
-    randX = function() {
-      return document.body.clientWidth / 2 + Math.random() * 100 - 50;
-    };
-    randY = function() {
-      return document.body.clientHeight / 3 + Math.random() * 100 - 50;
-    };
-    g = new Graph();
-    g.intialise3points([randX(), randY()], [randX(), randY()], [randX(), randY()]);
-    return {
-      graph: g,
-      normalDist: NormalDistribution.make(edgelen(g.edges[0]), edgelen(g.edges[1]), edgelen(g.edges[2])),
-      triModalDist: TriModal.make(edgelen(g.edges[0]), edgelen(g.edges[1]), edgelen(g.edges[2])),
-      augmentProportion: 0.8,
-      distribution: 'NORMAL'
-    };
-  },
-  setSpiky: function() {
-    return this.setState({
-      augmentProportion: 0.8
-    });
-  },
-  setRound: function() {
-    return this.setState({
-      augmentProportion: 0.6
-    });
-  },
-  grow: function() {
-    var dist, success;
-    console.log('grow()');
-    dist = this.state.distribution === 'NORMAL' ? this.state.normalDist : this.state.triModalDist;
-    if (Math.random() > this.state.augmentProportion) {
-      success = shortcut(this.state.graph);
-      if (!success) {
-        augment(this.state.graph, dist);
-      }
-    } else {
-      augment(this.state.graph, dist);
-    }
-    this.setState({
-      graph: this.state.graph
-    });
-  },
-  grow20: function() {
-    var cont, target;
-    console.log('grow20()');
-    target = this.state.graph.points.length + 20;
-    cont = (function(_this) {
-      return function() {
-        if (_this.state.graph.points.length < target) {
-          _this.grow();
-          return setTimeout(cont, 5);
-        }
-      };
-    })(this);
-    cont();
-    this.setState({
-      graph: this.state.graph
-    });
-  },
-  restart: function() {
-    var graph, normalDist, triModalDist, _ref1;
-    _ref1 = this.getInitialState(), graph = _ref1.graph, normalDist = _ref1.normalDist, triModalDist = _ref1.triModalDist;
-    return this.setState({
-      graph: graph,
-      normalDist: normalDist,
-      triModalDist: triModalDist
-    });
-  },
-  setNormal: function() {
-    return this.setState({
-      distribution: 'NORMAL'
-    });
-  },
-  setTriModal: function() {
-    return this.setState({
-      distribution: 'TRI_MODAL'
-    });
-  },
-  render: function() {
-    return div({}, [
-      RaphaelComp({
-        graph: this.state.graph
-      }), SidebarComp({
-        onSetSpiky: this.setSpiky,
-        onSetRound: this.setRound,
-        grow: this.grow,
-        grow20: this.grow20,
-        restart: this.restart,
-        augmentProportion: this.state.augmentProportion,
-        distribution: this.state.distribution,
-        setNormal: this.setNormal,
-        setTriModal: this.setTriModal
-      }), HistogramComp({
-        graph: this.state.graph
-      })
-    ]);
-  }
-});
-
-window.onload = function() {
-  React.renderComponent(App(), document.getElementsByTagName('body')[0]);
-};
-
-shortcut = function(graph) {
-  var bestshortcut, d, i, nointersections, p1, p2, p3, t1, t2, t3, _i, _ref1, _ref2, _ref3;
-  if (graph.edges.length < 6) {
-    return false;
-  }
-  bestshortcut = Infinity;
-  for (i = _i = 0, _ref1 = graph.exteriors.length - 2; 0 <= _ref1 ? _i < _ref1 : _i > _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
-    _ref2 = graph.exteriors.slice(i, +(i + 2) + 1 || 9e9), t1 = _ref2[0], t2 = _ref2[1], t3 = _ref2[2];
-    d = distbetween(t1, t3);
-    nointersections = function() {
-      var a, b, _j, _len, _ref3, _ref4;
-      _ref3 = graph.edges;
-      for (_j = 0, _len = _ref3.length; _j < _len; _j++) {
-        _ref4 = _ref3[_j], a = _ref4[0], b = _ref4[1];
-        if (intersects(a, b, t1, t3)) {
-          return false;
-        }
-      }
-      return true;
-    };
-    if (d < bestshortcut && !graph.hasEdge([t1, t3]) && nointersections()) {
-      bestshortcut = d;
-      _ref3 = [t1, t2, t3], p1 = _ref3[0], p2 = _ref3[1], p3 = _ref3[2];
-    }
-  }
-  if (bestshortcut < Infinity) {
-    graph.shortcut(p1, p2, p3);
-    console.log('shortcut success!');
-    return true;
-  } else {
-    console.log('convex');
-    return false;
-  }
-};
-
-augment = function(graph, dist) {
-  var i, l1, l2, n1, n2, nps, p1, p2, safeToAdd;
-  l1 = dist.sample();
-  l2 = dist.sample();
-  i = Math.floor(Math.random() * (graph.exteriors.length - 1));
-  p1 = graph.exteriors[i];
-  p2 = graph.exteriors[i + 1];
-  nps = newpoints(p1, p2, l1, l2);
-  if (nps.length > 0) {
-    n1 = nps[0], n2 = nps[1];
-    safeToAdd = function(testpoint) {
-      var a, b, c, p, _i, _j, _k, _len, _len1, _len2, _ref1, _ref2, _ref3, _ref4;
-      _ref1 = graph.points;
-      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-        p = _ref1[_i];
-        if (distbetween(p, testpoint) < 20) {
-          return false;
-        }
-      }
-      _ref2 = graph.adjacentpoints(p1);
-      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-        c = _ref2[_j];
-        if ((__indexOf.call(graph.adjacentpoints(p2), c) >= 0)) {
-          if (intriangle(p1, p2, c, testpoint)) {
-            return false;
-          }
-        }
-      }
-      _ref3 = graph.edges;
-      for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
-        _ref4 = _ref3[_k], a = _ref4[0], b = _ref4[1];
-        if (intersects(a, b, testpoint, p1)) {
-          return false;
-        }
-        if (intersects(a, b, testpoint, p2)) {
-          return false;
-        }
-      }
-      return true;
-    };
-    if (safeToAdd(n2)) {
-      graph.extend(p1, p2, n2);
-      return console.log('augmented');
-    } else if (safeToAdd(n1)) {
-      graph.extend(p1, p2, n1);
-      return console.log('augmented');
-    } else {
-      return augment(graph, dist);
-    }
-  } else {
-    return augment(graph, dist);
-  }
-};

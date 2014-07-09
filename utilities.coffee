@@ -54,3 +54,77 @@ newpoints = (p1,p2,l1,l2) ->
       return [[x1+r,y2+s], [x2+r,y1+s]]  # translate away from origin
     else
       return [[x1+r,y1+s], [x2+r,y2+s]]  # translate away from origin
+
+
+shortcut = (graph) ->
+  # console.log 'shortcut'
+  if graph.edges.length < 6 then return false
+
+  # select two random points (with one inbetween) to shortcut
+  # i = Math.floor(Math.random()*(graph.exteriors.length - 2))
+  # [p1,p2,p3] = graph.exteriors[i..i+2]
+
+  # choose shortest possible shortcut
+  bestshortcut = Infinity
+  for i in [0...graph.exteriors.length-2]
+    [t1,t2,t3] = graph.exteriors[i..i+2]
+    d = distbetween(t1,t3)
+    # check new edge doesn't overlap with anything
+    nointersections = () ->
+      for [a,b] in graph.edges
+        if intersects(a,b,t1,t3) then return false
+      return true
+    if d < bestshortcut and not graph.hasEdge([t1,t3]) and nointersections()
+      bestshortcut = d
+      [p1,p2,p3] = [t1,t2,t3] # hoists vars for later
+
+  # do the shortcut!
+  if bestshortcut < Infinity
+    graph.shortcut(p1,p2,p3)
+    console.log 'shortcut success!'
+    return true
+  else
+    console.log 'convex'
+    return false
+
+augment = (graph, dist) ->
+  # sample two new lengths
+  l1 = dist.sample()
+  l2 = dist.sample()
+
+  # randomly select two exterior points to augment
+  i = Math.floor(Math.random()*(graph.exteriors.length - 1))
+  p1 = graph.exteriors[i]
+  p2 = graph.exteriors[i+1]
+
+  nps = newpoints(p1,p2,l1,l2) # can return an empty list if impossible
+  if nps.length > 0
+    [n1, n2] = nps
+
+    safeToAdd = (testpoint) ->
+      # check point isn't already in graph
+      for p in graph.points
+        if distbetween(p, testpoint) < 20
+          return false
+
+      # check new point doesn't form 4-sided shape
+      for c in graph.adjacentpoints(p1) when (c in graph.adjacentpoints(p2))
+        if intriangle(p1,p2,c,testpoint) then return false
+
+      # check both new edges don't overlap with anything
+      for [a,b] in graph.edges
+        if intersects(a,b,testpoint,p1) then return false
+        if intersects(a,b,testpoint,p2) then return false
+
+      return true
+
+    if safeToAdd(n2)
+      graph.extend(p1,p2,n2)
+      console.log 'augmented'
+    else if safeToAdd(n1)
+      graph.extend(p1,p2,n1)
+      console.log 'augmented'
+    else
+      augment(graph, dist)
+  else
+    augment(graph, dist)

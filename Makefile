@@ -1,2 +1,5 @@
-all: graph.coffee normalDistribution.coffee utilities.coffee main.coffee
-	coffee -cbj altj graph.coffee normalDistribution.coffee utilities.coffee main.coffee
+all: graph.coffee distributions.coffee utilities.coffee ui.coffee
+	coffee -cbj altj graph.coffee distributions.coffee utilities.coffee ui.coffee
+
+watch:
+	coffee -cwbj altj graph.coffee distributions.coffee utilities.coffee ui.coffee
